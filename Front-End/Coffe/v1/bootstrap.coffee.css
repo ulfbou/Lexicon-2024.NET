@@ -1,0 +1,38 @@
+:root {
+  --bs-primary: #00144E;
+  --bs-secondary: #FA385A;
+  --bs-light: #f2f2f2;
+}
+
+:root {
+  --bs-primary: #00144E; /* Primary color */
+  --bs-secondary: #FA385A; /* Secondary color */
+  --bs-light: #f2f2f2; /* Light color */
+}
+
+/* Apply primary color to all section headings */
+main h2 {
+  color: var(--bs-primary);
+}
+
+/* Apply secondary color to links and buttons for emphasis */
+main a, main button {
+  color: var(--bs-secondary);
+}
+
+/* Use the light color as the background for sections to make the content pop */
+main section {
+  background-color: var(--bs-light);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+}
+
+/* Optionally, change the navbar and footer background to match */
+.navbar, footer {
+  background-color: var(--bs-primary);
+}
+
+.footer-logotype, footer {
+  color: var(--bs-light);
+}

@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.5" />
+    <PackageReference Include="microsoft.EntityFrameworkCore" Version="8.0.5" />
+    <PackageReference Include="microsoft.EntityFrameworkCore.design" Version="8.0.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="microsoft.EntityFrameworkCore.SqlServer" Version="8.0.5" />
+    <PackageReference Include="microsoft.EntityFrameworkCore.tools" Version="8.0.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TournamentAPI.Core\TournamentAPI.Core.csproj" />
+    <ProjectReference Include="..\TournamentAPI.Data\TournamentAPI.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="TournamentAPI.Core">
+      <HintPath>..\TournamentAPI.Core\bin\Debug\net8.0\TournamentAPI.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="TournamentAPI.Data">
+      <HintPath>..\TournamentAPI.Data\bin\Debug\net8.0\TournamentAPI.Data.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

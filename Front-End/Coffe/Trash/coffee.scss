@@ -1,0 +1,19 @@
+$primary: #00144E;
+$secondary: #FA385A;
+$light: #f2f2f2;
+
+// Usage
+.btn-primary {
+  background-color: $primary;
+  &:hover {
+    background-color: darken($primary, 10%);
+  }
+}
+
+.bg-secondary {
+  background-color: $secondary;
+}
+
+.text-light {
+  color: $light;
+}

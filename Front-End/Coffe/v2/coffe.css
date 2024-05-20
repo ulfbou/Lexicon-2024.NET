@@ -1,0 +1,226 @@
+.company-name {
+    font-family: 'Shrikhand', cursive;
+}
+img {
+    width: 200px;
+    height: 300px;
+    object-fit: cover;
+}
+h2 {
+    color: var(--primary-color);
+}
+
+p {
+    color: var(--secondary-color);
+}
+/* Spacing */
+.container {
+margin: 20px;
+padding: 10px;
+}
+/* logotype and headers */
+.logotype, h1, h2,h3,h4,h5,h6 {
+font-family: 'Shrikhand', cursive;
+}
+.section-1 {
+background-color: var(--bs-primary);
+color: #fff;
+}
+
+.section-2 {
+background-color: var(--bs-secondary);
+color: #fff;
+}
+
+
+/* Spacing */
+.container {
+    margin: 20px;
+    padding: 10px;
+}
+
+/* Logotype and headers */
+.logotype, h1, h2,h3,h4,h5,h6 {
+    font-family: 'Shrikhand', cursive;
+}
+
+/* Custom styles for sections */
+.section-1 {
+    background-color: var(--bs-primary);
+    color: var(--bs-light);
+}
+
+.section-2 {
+    background-color: var(--bs-secondary);
+    color: var(--bs-light);
+}
+
+/* Set heading color */
+h2 {
+    color: var(--bs-primary);
+}
+
+/* Set paragraph color */
+p {
+    color: var(--bs-secondary);
+}
+
+/* Custom image sizing */
+img {
+    width: 120px;
+    height: 180px;
+    object-fit: cover;
+}
+/* Colors */
+:root {
+    --bs-primary: #2C1F1D; /* Dark brown */
+    --bs-secondary: #493F34; /* Medium brown */
+    --bs-light: #D6C4A0; /* Light brown */
+    --bs-logotype: #3F2F2D; /* Coffee brown */
+    --bs-nav-bg: #C2A988; /* Navigation bar background color */
+    --bs-row-bg: #B8A177; /* Row background color */
+    --section-1-bg: #b9a385; /* Light brown color */
+    --section-2-bg: #a98e76; /* Slightly darker brown color */
+}
+
+body.bg-light {
+    background-color: var(--bs-light) !important;
+}
+.navbar-light {
+    background-color: var(--bs-nav-bg);
+    color: var(--bs-primary);
+}
+.fg-light {
+    color: var(--bs-light) !important;
+}
+.fg-medium {
+    color: var(--bs-secondary) !important;
+}
+.fg-dark {
+    color: var(--bs-primary) !important;
+}
+
+.navbar-light .navbar-nav .nav-link {
+    color: var(--bs-primary);
+}
+.container .bg-dark {
+    background-color: var(--bs-primary);
+}
+.section-1 {
+    background-color: var(--section-1-bg) !important;
+    color: var(--section-2-bg) !important;
+}
+
+.section-2 {
+    background-color: var(--section-2-bg) !important;
+    color: var(--bs-light) !important;
+}
+.logotype {
+    color: var(--bs-logotype);
+}
+
+
+
+/* REDOING THE CSS FILE */
+/* Colors */
+:root {
+    --bs-primary: #2C1F1D; /* Dark brown */
+  --bs-secondary: #493F34; /* Medium brown */
+  --bs-light: #D6C4A0; /* Light brown */
+  --bs-logotype: #3F2F2D; /* Coffee brown */
+  --bs-nav-bg: #C2A988; /* Navigation bar background color */
+  --bs-row-bg: #B8A177; /* Row background color */
+  --section-1-bg: #b9a385; /* Light brown color */
+  --section-2-bg: #a98e76; /* Slightly darker brown color */
+  }
+  
+  /* Spacing */
+  .container {
+    margin: 20px;
+    padding: 10px;
+  }
+  
+  /* Logotype and headers */
+  .logotype,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Shrikhand', cursive;
+  }
+  
+  /* Custom styles for sections */
+  .section-1 {
+    background-color: var(--section-1-bg);
+    color: var(--section-2-bg);
+  }
+  
+  .section-2 {
+    background-color: var(--section-2-bg);
+    color: var(--bs-light);
+  }
+  
+  /* Set heading color */
+  h2 {
+    color: var(--bs-primary);
+  }
+  
+  /* Set paragraph color */
+  p {
+    color: var(--bs-secondary);
+  }
+  
+  /* Custom image sizing */
+  img {
+    width: 120px;
+    height: 180px;
+    object-fit: cover;
+  }
+  
+  /* Responsive design for image and paragraph */
+  @media (min-width: 768px) {
+    img {
+      width: 200px;
+      height: 300px;
+    }
+  }
+  
+  /* Styles for Bootstrap elements */
+  body.bg-light {
+    background-color: var(--bs-light);
+  }
+  
+  .navbar-light {
+    background-color: var(--bs-nav-bg);
+    color: var(--bs-primary);
+  }
+  
+  .navbar-light .navbar-nav .nav-link {
+    color: var(--bs-primary);
+  }
+  
+  .container .bg-dark {
+    background-color: var(--bs-primary);
+  }
+  
+  /* Text colors */
+  .fg-light {
+    color: var(--bs-light);
+  }
+  
+  .fg-medium {
+    color: var(--bs-secondary);
+  }
+  
+  .fg-dark {
+    color: var(--bs-primary);
+  }
+  
+  .company-name {
+    font-family: 'Shrikhand', cursive;
+  }
+    .email-text {
+      word-break: break-all;
+    }

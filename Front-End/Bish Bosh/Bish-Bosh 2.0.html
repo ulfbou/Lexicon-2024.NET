@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bish-Bosh 2.0</title>
+  <link rel="stylesheet" type="text/css" href="Bish-Bish.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;700&family=Open+Sans&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+  <div class="container-fluid">
+    <header>
+      <h2>Bish-Bosh 2.0</h2>
+    </header>
+
+    <main class="container">
+      <section>
+        <div class="info-box">
+          <h3>What is Bish-Bosh?</h3>
+          <p>The main goal of this game is to generate a visual representation of a customized Bish-Bosh sequence.</p>
+          <h3>Rules</h3>
+          <ol>
+          <li>Users input a value for 'Bish', 'Bosh', and a loop counter, which determines the range of numbers to be displayed.</li>
+          <li>If a number in the sequence is divisible by the 'Bish' input, the number is replaced with 'Bish'.</li>
+          <li>If a number is divisible by the 'Bosh' input, it is replaced by 'Bosh'.</li>
+          <li>If a number is divisible by both the 'Bish' and 'Bosh' inputs, it is replaced by 'Bish-Bosh'.</li>
+          </ol>
+          <h3>Functionality</h3>
+          <p>The provided interface enables users to input their desired values for 'Bish', 'Bosh', and the loop counter. Upon submission, the generated Bish-Bosh sequence is displayed visually within the interface, based on the rules described above.</p>
+          <h3>Purpose</h3>
+          <p>This page offers an engaging and user-friendly experience for creating and displaying personalized Bish-Bosh sequences. By allowing users to define their parameters, the interface provides an interactive and customizable gaming experience.</p>
+        </div>
+      </section>
+      <section>
+        <form id="bishbosh">
+          <div>
+            <label for="bish"><i class="fas fa-gamepad"></i> Bish:</label>
+            <input type="number" id="bish" required>
+          </div>
+          <div>
+            <label for="bosh"><i class="fas fa-gamepad"></i> Bosh:</label>
+            <input type="number" id="bosh" required>
+          </div>
+          <div>
+            <label for="count"><i class="fas fa-gamepad"></i> Loop Count:</label>
+            <input type="number" id="count" min="1" required>
+          </div>
+          <div>
+            <button type="submit" class="generate-btn"><i class="fas fa-play"></i> Generate</button>
+          </div>
+        </form>
+        <div id="result-box"><h3>Resulting Bish Bosh Sequence</h3></div>
+      </section>
+    </main>
+    <footer>
+      &copy; 2024 Ulf Bourelius. All rights reserved.
+    </footer>
+  </div>
+  <script src="bish-bosh.js"></script>
+</body>
+</html>

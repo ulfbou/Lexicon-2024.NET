@@ -1,0 +1,78 @@
+﻿<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{7078C571-C96A-42A8-B9FE-624A82883245}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <NoStandardLibraries>false</NoStandardLibraries>
+    <AssemblyName>ConsoleApplication</AssemblyName>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>Garage</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ConsoleMenu.cs" />
+    <Compile Include="ConsoleMenuItem.cs" />
+    <Compile Include="ConsoleUI.cs" />
+    <Compile Include="Deprecated\NotSoSimpleMenu.cs" />
+    <Compile Include="Deprecated\OldGarageHandler.cs" />
+    <Compile Include="Deprecated\OldProgram.cs" />
+    <Compile Include="Entities\Airplane.cs" />
+    <Compile Include="Entities\Boat.cs" />
+    <Compile Include="Entities\Bus.cs" />
+    <Compile Include="Entities\Car.cs" />
+    <Compile Include="Entities\IVehicle.cs" />
+    <Compile Include="Entities\Motorcycle.cs" />
+    <Compile Include="Entities\Properties\Properties.cs" />
+    <Compile Include="Entities\Vehicle.cs" />
+    <Compile Include="Garage.cs" />
+    <Compile Include="GarageHandler.cs" />
+    <Compile Include="GarageManager.cs" />
+    <Compile Include="IMenuItem.cs" />
+    <Compile Include="IUI.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="PropertySelector.cs" />
+    <Compile Include="SimpleMenu.cs" />
+    <Compile Include="SimpleUI.cs" />
+    <Compile Include="VehicleManager.cs" />
+    <Compile Include="VehicleSearcher.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
+  <ProjectExtensions>
+    <VisualStudio AllowExistingFolder="true" />
+  </ProjectExtensions>
+</Project>

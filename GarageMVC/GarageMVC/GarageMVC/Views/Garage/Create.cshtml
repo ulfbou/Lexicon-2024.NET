@@ -1,0 +1,92 @@
+﻿@model GarageMVC.Models.ParkedVehicleModel
+
+@{
+    ViewData["Title"] = "Create";
+    var vehicleConstants = ViewBag.VehicleConstants as GarageMVC.Data.VehicleConstants;
+    var types = vehicleConstants?["Types"];
+    var colors = vehicleConstants?["Colors"];
+
+    if (ViewBag.RegistrationNumbers is not null)
+    {
+        var regNums = (IEnumerable<string>)ViewBag.RegistrationNumbers;
+    }
+    <!-- Use 'types' and 'colors' in your select elements -->
+}
+
+<h1>Create</h1>
+
+<h4>Park a Vehicle</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Type" class="control-label"></label>
+                
+                <select asp-for="Type" class="form-control">
+                    @if (types is not null)
+                    {
+                        @foreach(var type in types)
+                        {
+                            <option value="@type">@type</option>
+                        }
+                    }
+                    '</select>
+                <span asp-validation-for="Type" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <label asp-for="Color" class="control-label"></label>
+                <select asp-for="Color" class="form-control">
+                    @if (colors is not null)
+                    {
+                        @foreach(var color in colors)
+                        {
+                            <option value="@color">@color</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="Color" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <label asp-for="RegistrationNumber" class="control-label"></label>
+                <input asp-for="RegistrationNumber" class="form-control" />
+                <span asp-validation-for="RegistrationNumber" id="registration-error" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <label asp-for="Brand" class="control-label"></label>
+                <input asp-for="Brand" class="form-control" />
+                <span asp-validation-for="Brand" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <label asp-for="Model" class="control-label"></label>
+                <input asp-for="Model" class="form-control" />
+                <span asp-validation-for="Model" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <label asp-for="NumberOfWheels" class="control-label"></label>
+                <input asp-for="NumberOfWheels" class="form-control" />
+                <span asp-validation-for="NumberOfWheels" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+<br />
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

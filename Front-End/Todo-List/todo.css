@@ -1,0 +1,62 @@
+.mouseover {
+    background-color: gray;
+}
+.line-through {
+    text-decoration:line-through; 
+}
+
+ol li 
+{
+    background-color:#fff;
+}
+
+ol li:hover 
+{
+    background-color:#eee;
+}
+
+body {
+    background-color: #f8f9fa;
+}
+
+.form-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-label {
+    font-weight: bold;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group input[type="text"] {
+    flex: 1;
+}
+.flex-container {
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 576px) {
+    .form-wrapper {
+        flex-direction: row;
+        align-items: flex-end;
+    }
+
+    .input-group {
+        flex: 1;
+    }
+}
+
+#add-todo-item-form {
+    width:100%;
+}
+
+#new-todo-list-form {
+    width:100%;
+}

@@ -1,0 +1,6 @@
+@TournamentAPI_HostAddress = http://localhost:5222
+
+GET {{TournamentAPI_HostAddress}}/TournamentAPI/
+Accept: application/json
+
+###

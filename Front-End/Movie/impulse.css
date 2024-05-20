@@ -1,0 +1,263 @@
+/* Grundläggande stilinställningar */
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #d6263c; /* Anpassa denna färg efter filmens tema */
+    color: #f2f2f2; /* Textfärg */
+    font-family: 'Arial', sans-serif; /* Typsnitt */
+}
+body > div {
+    max-width: 1400px; /* Maximal bredd för större skärmar */
+    margin: auto; /* Centrerar `div`-elementet */
+    padding: 20px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+body > div > * {
+    max-width: 100%;
+    margin: auto;
+}
+
+@media (max-width: 768px) {
+    body > div {
+        max-width: 100%; /* Full bredd för mindre skärmar */
+        padding: 0 10px; /* Lägger till lite utrymme på sidorna */
+    }
+}
+
+/* Header-stil */
+header {
+    width: 100%; /* Full bredd */
+    background-color: #29080b; /* Anpassa denna färg efter ditt tema */
+    overflow: hidden; /* Förhindrar innehåll från att flyta utanför */
+    z-index: 10; /* Säkerställer att headern ligger ovanpå andra element */
+}
+
+/* Header-bildstil */
+header img {
+    max-width: 100%; /* Begränsar bilden till headerns bredd */
+    height: auto; /* Bibehåller bildens proportioner */
+    margin: auto; /* Centrerar bilden om den inte fyller bredden */
+    display: block; /* Gör att bilden kan centreras */
+}
+
+/* Centrerar allt innehåll i header */
+header > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Anpassar header för olika enheter */
+@media (max-width: 768px) {
+    header > div {
+        max-width: 100%; /* Full bredd för mindre skärmar */
+        padding: 0 10px; /* Lägger till utrymme på sidorna */
+    }
+}
+
+@media (max-width: 1200px) {
+    body > div {
+        max-width: 1200px; /* Maximal bredd för större skärmar */
+        margin: auto; /* Centrerar `div`-elementet */
+    }
+}
+
+
+/* Centrerar videoinnehåll */
+video {
+    display: block; /* Gör att videon kan centreras */
+    margin: 0 auto; /* Centrerar videon i blocket */
+}
+
+/* Horisontell länklista */
+nav ul {
+    display: flex;
+    list-style-type: none;
+    padding: 0;
+}
+
+nav li {
+    margin: 0 10px; /* Ger lite utrymme mellan länkarna */
+}
+
+nav a {
+    text-decoration: none;
+    color: #f2f2f2; /* Länkfärg */
+}
+/* Stil för navigationsmenyn */
+nav {
+    display: flex; /* Använder flexbox för att placera länkarna horisontellt */
+    justify-content: center; /* Centrerar länkarna i navigationsmenyn */
+    padding: 10px 0; /* Lägger till vertikal padding */
+}
+
+/* Stil för varje länk i navigationsmenyn */
+nav a {
+    display: block; /* Gör varje länk till en blockelement */
+    margin: 0 15px; /* Lägger till horisontell margin mellan länkarna */
+    padding: 10px 20px; /* Lägger till padding för att skapa lådor */
+    text-decoration: none; /* Tar bort understrykningen från länkar */
+    background-color: #f2f2f2; /* Lägger till bakgrundsfärg till varje länk */
+    color: #29080b; /* Ställer in textfärgen */
+    border-radius: 5px; /* Ger länkarna rundade hörn */
+    transition: background-color 0.3s; /* Lägger till en övergångseffekt när muspekaren är över */
+}
+
+/* Stil för länkarna när muspekaren är över */
+nav a:hover {
+    background-color: #ddd; /* Ändrar bakgrundsfärgen när muspekaren är över */
+}
+
+/* Responsiv design för mobila enheter */
+@media (max-width: 768px) {
+    nav {
+        flex-direction: column; /* Staplar länkarna vertikalt på små skärmar */
+    }
+
+    nav a {
+        margin: 10px 0; /* Lägger till vertikal margin mellan länkarna */
+    }
+}
+
+/* Footer-stil */
+footer {
+    width: 100%;
+    height: 50px;
+    background-color: #444; /* En annan bakgrundsfärg än resten av sidan */
+    color: #f2f2f2; /* Textfärg för kontrast */
+    text-align: center;
+    line-height: 50px; /* Centrerar texten vertikalt */
+}
+
+/* Responsiv design för mobila enheter */
+@media (max-width: 600px) {
+    body {
+        font-size: 14px; /* Mindre textstorlek för mobila enheter */
+    }
+
+    nav ul {
+        flex-direction: column; /* Staplar länkarna vertikalt på små skärmar */
+        align-items: center;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Grundläggande stilinställningar */
+body {
+    min-height: 100vh;
+    background-color: #fa385a; /* Anpassa denna färg efter filmens tema */
+    color: #f2f2f2; /* Textfärg */
+    font-family: 'Arial', sans-serif; /* Typsnitt */
+}
+
+.container {
+    max-width: 1400px; /* Maximal bredd för större skärmar */
+    margin: auto; /* Centrerar `div`-elementet */
+    padding: 20px;
+    background-color: #fff; /* Vit bakgrundsfärg */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.container > * {
+    max-width: 100%;
+    margin: auto;
+}
+
+/* Header-stil */
+header {
+    width: 100%; /* Full bredd */
+    background-color: #c50037; /* Mörkare nyans av huvudfärgen */
+    overflow: hidden; /* Förhindrar innehåll från att flyta utanför */
+    z-index: 10; /* Säkerställer att headern ligger ovanpå andra element */
+}
+
+/* Header-bildstil */
+header img {
+    max-width: 100%; /* Begränsar bilden till headerns bredd */
+    height: auto; /* Bibehåller bildens proportioner */
+    margin: auto; /* Centrerar bilden om den inte fyller bredden */
+    display: block; /* Gör att bilden kan centreras */
+}
+
+/* Anpassar header för olika enheter */
+@media (max-width: 768px) {
+    .container {
+        max-width: 100%; /* Full bredd för mindre skärmar */
+        padding: 0 10px; /* Lägger till utrymme på sidorna */
+    }
+}
+
+@media (max-width: 1200px) {
+    .container {
+        max-width: 1200px; /* Maximal bredd för större skärmar */
+        margin: auto; /* Centrerar `div`-elementet */
+    }
+}
+
+/* Centrerar videoinnehåll */
+video {
+    display: block; /* Gör att videon kan centreras */
+    margin: 0 auto; /* Centrerar videon i blocket */
+}
+
+/* Horisontell länklista */
+nav ul {
+    display: flex;
+    list-style-type: none;
+    padding: 0;
+}
+
+nav li {
+    margin: 0 10px; /* Ger lite utrymme mellan länkarna */
+}
+
+nav a {
+    text-decoration: none;
+    color: #f2f2f2; /* Länkfärg */
+}
+
+/* Footer-stil */
+footer {
+    width: 100%;
+    height: 50px;
+    background-color: #c50037; /* Mörkare nyans av huvudfärgen för kontrast */
+    color: #f2f2f2; /* Textfärg för kontrast */
+    text-align: center;
+    line-height: 50px; /* Centrerar texten vertikalt */
+}
+
+/* Responsiv design för mobila enheter */
+@media (max-width: 600px) {
+    body {
+        font-size: 14px; /* Mindre textstorlek för mobila enheter */
+    }
+
+    nav ul {
+        flex-direction: column; /* Staplar länkarna vertikalt på små skärmar */
+        align-items: center;
+    }
+}
