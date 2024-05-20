@@ -1,36 +1,44 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TournamentAPI.Core.Entities;
-using TournamentAPI.Data.Data;
+using TournamentAPI.Core.Dto;
+using TournamentAPI.Data.Repositories;
 
 namespace TournamentAPI.Controllers;
 
 [Route("api/[controller]")]
-[ApiController] 
-public class TournamentsAPIController(TournamentAPIContext context) : ControllerBase 
+[ApiController]
+public class TournamentsController(TournamentAPIContext context, IUoW unitOfWork, IMapper mapper) : ControllerBase
 {
-    private readonly TournamentAPIContext _context = context;
-    
+    private readonly TournamentAPIContext _context = context ?? throw new ArgumentNullException(nameof(context));
+    private readonly IUoW _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+    private readonly IMapper _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+
     // GET: api/Tournaments
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Tournament>>> GetTournament()
+    public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournaments()
     {
-        return await _context.Tournament.ToListAsync();
+        var tournaments = await _unitOfWork.TournamentRepository.GetAllAsync();
+
+        if (tournaments is null) return NotFound();
+
+        var tournamentDtos = _mapper.Map<IEnumerable<TournamentDto>>(tournaments);
+        return Ok(tournamentDtos);
     }
 
     // GET: api/Tournaments/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Tournament>> GetTournament(int id)
     {
-        var tournament = await _context.Tournament.FindAsync(id);
+        var tournament = await _unitOfWork.TournamentRepository.GetAsync(id);
 
         if (tournament == null)
         {
             return NotFound();
         }
 
-        return tournament;
+        var tournamentDto = _mapper.Map<TournamentDto>(tournament);
+        return Ok(tournamentDto);
     }
 
     // PUT: api/Tournaments/5
