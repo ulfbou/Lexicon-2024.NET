@@ -11,5 +11,5 @@ public class TournamentAPIContext : DbContext
     }
 
     public DbSet<TournamentAPI.Core.Entities.Tournament> Tournament => Set<Tournament>();
-    public DbSet<TournamentAPI.Core.Entities.Game> Game => Set<Game>();
+    public DbSet<TournamentAPI.Core.Entities.Game> Game => Set<Game>(); 
 }  

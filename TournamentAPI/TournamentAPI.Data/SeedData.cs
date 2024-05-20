@@ -7,7 +7,7 @@ using TournamentAPI.Data.Data;
 
 namespace TournamentAPI.Data;
 public class SeedData
-{
+{ 
     private static readonly string TimeFormat = "yyyy-MM-dd HH:mm";
     private static Faker? faker = null;
 
