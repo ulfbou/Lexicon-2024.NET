@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TournamentAPI.Core.Entities;
+using TournamentAPI.Core.Repositories;
 using TournamentAPI.Data.Data;
 
 

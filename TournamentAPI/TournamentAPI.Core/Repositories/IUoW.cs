@@ -1,4 +1,4 @@
-﻿namespace TournamentAPI.Data.Repositories;
+﻿namespace TournamentAPI.Core.Repositories;
 
 public interface IUoW
 {

@@ -1,7 +1,6 @@
 ﻿using TournamentAPI.Core.Entities;
-using TournamentAPI.Data.Data;
 
-namespace TournamentAPI.Data.Repositories;
+namespace TournamentAPI.Core.Repositories; 
 
 public interface ITournamentRepository
 {

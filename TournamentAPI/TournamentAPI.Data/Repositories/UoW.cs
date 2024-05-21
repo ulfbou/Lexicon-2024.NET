@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using TournamentAPI.Core.Repositories;
 using TournamentAPI.Data.Data;
 
 namespace TournamentAPI.Data.Repositories;
