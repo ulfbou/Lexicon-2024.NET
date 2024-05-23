@@ -6,11 +6,11 @@ namespace TournamentAPI.Data.Repositories;
 
 public class UoW : IUoW
 {
-    private readonly TournamentAPIContext _context;
+    private readonly TournamentContext _context;
     private readonly TournamentRepository _tournamentRepository;
     private readonly GameRepository _gameRepository;
 
-    public UoW(TournamentAPIContext context)
+    public UoW(TournamentContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _tournamentRepository = new TournamentRepository(context);
