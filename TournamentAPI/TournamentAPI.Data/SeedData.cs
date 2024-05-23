@@ -1,9 +1,11 @@
-﻿using Bogus;
+﻿using AutoMapper;
+using Bogus;
 using Bogus.DataSets;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using TournamentAPI.Core.Entities;
 using TournamentAPI.Data.Data;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TournamentAPI.Data;
 public class SeedData
@@ -88,7 +90,7 @@ public class SeedData
         for (int i = 0; i < numberOfTournaments; i++)
         {
             var title = faker!.Company.CompanyName() + " Cup";
-            var time = DateTime.Today.AddHours(10).AddDays(30);
+            var time = DateTime.Today.AddHours(9).AddDays(30);
             var games = GenerateGames(8, players, time!);
 
             var tournament = new Tournament
