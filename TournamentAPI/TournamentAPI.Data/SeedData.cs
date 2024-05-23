@@ -13,7 +13,7 @@ public class SeedData
     private static readonly string TimeFormat = "yyyy-MM-dd HH:mm";
     private static Faker? faker = null;
 
-    public static async Task InitAsync(TournamentAPIContext context)
+    public static async Task InitAsync(TournamentContext context)
     {
         if (await context.Tournament.AnyAsync()) return;
 

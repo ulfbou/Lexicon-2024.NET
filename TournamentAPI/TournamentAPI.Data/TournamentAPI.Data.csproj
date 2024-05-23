@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
-    <PackageReference Include="bogus" Version="35.5.1" />
-    <PackageReference Include="microsoft.EntityFrameworkCore" Version="8.0.5" />
+    <PackageReference Include="Bogus" Version="35.5.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.design" Version="8.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -20,6 +20,9 @@
   <ItemGroup>
     <Reference Include="TournamentAPI.Core">
       <HintPath>..\TournamentAPI.Core\bin\Debug\net8.0\TournamentAPI.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="TournamentAPI.Data">
+      <HintPath>bin\Debug\net8.0\TournamentAPI.Data.dll</HintPath>
     </Reference>
   </ItemGroup>
 
