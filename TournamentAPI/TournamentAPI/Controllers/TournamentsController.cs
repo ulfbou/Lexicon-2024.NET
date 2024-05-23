@@ -4,53 +4,64 @@ using Microsoft.Build.Framework;
 using Microsoft.EntityFrameworkCore;
 using TournamentAPI.Core.Dto;
 using TournamentAPI.Core.Repositories;
-using Serilog;
 using TournamentAPI.Core.Entities;
 
 namespace TournamentAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<TournamentsController> logger) : ControllerBase
+public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<GamesController> logger) : ControllerBase
 {
     private readonly IUoW _unitOfWork = unitOfWork;
     private readonly IMapper _mapper = mapper;
-    private readonly ILogger<TournamentsController> _logger = logger;
+    private readonly ILogger<GamesController> _logger = logger;
 
     // GET: api/Tournaments
-    [HttpGet]
     public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournaments()
     {
-        var tournaments = await _unitOfWork.TournamentRepository.GetAllAsync();
-
-        if (tournaments is null)
+        try
         {
-            _logger.LogWarning($"Tournament no longer exists.");
-            return NotFound("Tournaments no longer exists.");
-        }
+            var tournaments = await _unitOfWork.TournamentRepository.GetAllAsync();
 
-        return Ok(_mapper.Map<IEnumerable<Tournament>>(tournaments));
+            // Null check for tournaments (though usually this should return an empty list)
+            if (tournaments is null || !tournaments.Any())
+            {
+                _logger.LogWarning("No tournaments found.");
+                return NotFound("No tournaments found.");
+            }
+
+            return Ok(_mapper.Map<IEnumerable<TournamentDto>>(tournaments));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving tournaments.");
+            return StatusCode(500, "Internal server error.");
+        }
     }
 
     // GET: api/Tournaments/{id}
     [HttpGet("{id:int}")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<TournamentDto>> GetTournament(int id)
     {
-        if (!ModelState.IsValid)
+        try
         {
-            _logger.LogWarning($"Invalid model state for the Tournament {id}.");
-            return BadRequest(ModelState);
+            var tournament = await _unitOfWork.TournamentRepository.GetAsync(id);
+
+            if (tournament == null)
+            {
+                _logger.LogWarning($"Tournament with ID {id} not found.");
+                return NotFound($"Tournament with ID {id} not found.");
+            }
+
+            var tournamentDto = _mapper.Map<TournamentDto>(tournament);
+            return Ok(tournamentDto);
         }
-
-        var tournament = await _unitOfWork.TournamentRepository.GetAsync(id);
-
-        if (tournament is null)
+        catch (Exception ex)
         {
-            _logger.LogWarning($"Tournament with ID {id} no longer exists.");
-            return NotFound("Tournament no longer exists.");
+            _logger.LogError(ex, $"An error occurred while retrieving the tournament with ID {id}.");
+            return StatusCode(500, "Internal server error.");
         }
-
-        return Ok(_mapper.Map<Tournament>(tournament));
     }
 
     // POST: api/Tournaments
@@ -66,29 +77,28 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
 
         var tournament = _mapper.Map<Tournament>(tournamentDto);
 
-        if (tournament is null)
+        if (tournament == null)
         {
-            _logger.LogWarning($"Tournament with ID {tournamentDto.Id} no longer exists.");
-            return NotFound("Tournament no longer exists.");
+            _logger.LogWarning("Mapping error: TournamentDto could not be mapped to Tournament.");
+            return StatusCode(500, "Internal server error.");
         }
 
-        if (tournament.Title is null || tournament.StartDate is null || tournament.Games is null)
+        if (string.IsNullOrEmpty(tournament.Title) || tournament.StartDate == default || tournament.Games == null)
         {
-            string[] missing = [
-                tournament.Title != null ? "" : "title missing",
-                tournament.StartDate != null ? "" : "StartDate missing",
-                tournament.Games != null ? "" : "Games missing"
-            ];
-            _logger.LogWarning($"Bad request for creating a tournament. Missing required fields `{string.Join(',', missing)}`");
-            return BadRequest();
+            string[] missingFields = {
+                string.IsNullOrEmpty(tournament.Title) ? "title" : "",
+                tournament.StartDate == default ? "startDate" : "",
+                tournament.Games is null ? "games" : ""
+            };
+
+            _logger.LogWarning($"Bad request for creating a tournament. Missing required fields: {string.Join(", ", missingFields.Where(f => f != null))}");
+            return BadRequest("Missing required fields.");
         }
 
-        var id = tournament.Id;
-
-        if (await _unitOfWork.TournamentRepository.AnyAsync(id))
+        if (await _unitOfWork.TournamentRepository.AnyAsync(tournament.Id))
         {
-            _logger.LogWarning($"Conflict with post tournament `{id}`");
-            return Conflict();
+            _logger.LogWarning($"Conflict: Tournament with ID {tournament.Id} already exists.");
+            return Conflict("Tournament with the same ID already exists.");
         }
 
         _unitOfWork.TournamentRepository.Add(tournament);
@@ -100,32 +110,26 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            if (!await _unitOfWork.TournamentRepository.AnyAsync(id))
-            {
-                _logger.LogError("Post Tournament: Failed to create concurrent post.");
-                return StatusCode(500);
-            }
-
-            _logger.LogError(ex, "Concurrent update error occurred while updating tournament with ID {id}.", []);
+            _logger.LogError(ex, "Concurrent update error occurred while creating tournament with ID {tournament.Id}.", []);
             return StatusCode(500, "A concurrency error occurred.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while updating tournament with ID {id}.", []);
+            _logger.LogError(ex, "An error occurred while creating tournament with ID {tournament.Id}.", []);
             return StatusCode(500, "An unexpected error occurred.");
         }
 
         var createdTournament = _mapper.Map<TournamentDto>(tournament);
-
         return CreatedAtAction("GetTournament", new { id = createdTournament.Id }, createdTournament);
     }
 
     // PUT: api/Tournaments/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
+    // PUT: api/Tournaments/5
+    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutTournament(
-        int id,
-        TournamentDto dto)
+    public async Task<IActionResult> PutTournament(int id, TournamentDto dto)
     {
         if (!ModelState.IsValid)
         {
@@ -133,13 +137,15 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
             return BadRequest(ModelState);
         }
 
-        if (!await _unitOfWork.TournamentRepository.AnyAsync(id))
+        var existingTournament = await _unitOfWork.TournamentRepository.GetAsync(id);
+
+        if (existingTournament is null)
         {
             _logger.LogWarning($"Tournament with ID {id} not found.");
             return NotFound();
         }
 
-        var tournament = _mapper.Map<Tournament>(dto);
+        var tournament = _mapper.Map(dto, existingTournament);
 
         if (id != tournament.Id)
         {
@@ -149,7 +155,13 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
 
         if (string.IsNullOrEmpty(tournament.Title) || tournament.StartDate == default || tournament.Games == null)
         {
-            _logger.LogWarning($"Bad request: Incomplete body for tournament ID {id}.");
+            string[] missingFields = {
+                string.IsNullOrEmpty(tournament.Title) ? "title" : "",
+                tournament.StartDate == default ? "startDate" : "",
+                tournament.Games == null ? "games" : ""
+            };
+
+            _logger.LogWarning($"Bad request: Incomplete body for tournament ID {id}, Missing required fields: {string.Join(", ", missingFields.Where(f => f != null))}");
             return BadRequest("Incomplete tournament data.");
         }
 
@@ -161,61 +173,12 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            if (!await _unitOfWork.TournamentRepository.AnyAsync(id))
-            {
-                _logger.LogError("Post Tournament: Failed to create concurrent post.");
-                return StatusCode(500);
-            }
-
-            _logger.LogError(ex, "Concurrent update error occurred while updating tournament with ID {id}.", []);
+            _logger.LogError(ex, $"Concurrent update error occurred while updating tournament with ID {id}.");
             return StatusCode(500, "A concurrency error occurred.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while updating tournament with ID {id}.", []);
-            return StatusCode(500, "An unexpected error occurred.");
-        }
-
-        return NoContent();
-    }
-
-    // PUT: api/Tournaments/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPatch("{id}")]
-    public async Task<IActionResult> PatchTournament(
-        int id,
-        TournamentDto dto)
-    {
-        if (!ModelState.IsValid)
-        {
-            _logger.LogWarning("Invalid model state for the TournamentDto.");
-            return BadRequest(ModelState);
-        }
-
-        var tournament = _mapper.Map<Tournament>(dto);
-
-        if (id != tournament.Id) return BadRequest();
-
-        _unitOfWork.TournamentRepository.ChangeState(tournament, EntityState.Modified);
-
-        try
-        {
-            await _unitOfWork.CompleteAsync();
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            if (!await _unitOfWork.TournamentRepository.AnyAsync(id))
-            {
-                _logger.LogError("Post Tournament: Failed to create concurrent post.");
-                return StatusCode(500);
-            }
-
-            _logger.LogError(ex, "Concurrent update error occurred while updating tournament with ID {id}.", []);
-            return StatusCode(500, "A concurrency error occurred.");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An error occurred while updating tournament with ID {id}.", []);
+            _logger.LogError(ex, $"An error occurred while updating tournament with ID {id}.");
             return StatusCode(500, "An unexpected error occurred.");
         }
 
@@ -226,18 +189,12 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTournament(int id)
     {
-        if (!ModelState.IsValid)
-        {
-            _logger.LogWarning("Invalid model state for the TournamentDto.");
-            return BadRequest(ModelState);
-        }
-
         var tournament = await _unitOfWork.TournamentRepository.GetAsync(id);
 
         if (tournament is null)
         {
-            _logger.LogWarning($"Tournament with ID {id} no longer exists.");
-            return NotFound("Tournament no longer exists.");
+            _logger.LogWarning($"Tournament with ID {id} not found.");
+            return NotFound("Tournament not found.");
         }
 
         _unitOfWork.TournamentRepository.Remove(tournament);
@@ -249,68 +206,61 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            if (!await _unitOfWork.TournamentRepository.AnyAsync(id))
-            {
-                _logger.LogError("Post Tournament: Failed to create concurrent post.");
-                return StatusCode(500);
-            }
-
-            _logger.LogError(ex, "Concurrent update error occurred while updating tournament with ID {id}.", []);
+            _logger.LogError(ex, $"Concurrent update error occurred while deleting tournament with ID {id}.");
             return StatusCode(500, "A concurrency error occurred.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while updating tournament with ID {id}.", []);
+            _logger.LogError(ex, $"An error occurred while deleting tournament with ID {id}.");
             return StatusCode(500, "An unexpected error occurred.");
         }
 
         return NoContent();
     }
 
-    // GET: api/Tournaments/{tournamentId}/Games
-    [HttpGet("{tournamentId:int}/Games")]
+    // GET: api/Tournaments/{id}/Games
+    [HttpGet("{tournamentId}/Games")]
     public async Task<ActionResult<IEnumerable<GameDto>>> GetGames(int tournamentId)
     {
         var tournament = await _unitOfWork.TournamentRepository.GetAsync(tournamentId);
 
         if (tournament is null)
         {
-            _logger.LogWarning($"Tournament with ID {tournamentId} no longer exists.");
-            return NotFound("Tournament no longer exists.");
+            _logger.LogWarning($"Tournament with ID {tournamentId} not found.");
+            return NotFound($"Tournament with ID {tournamentId} not found.");
         }
 
         var games = tournament.Games;
 
-
-        if (games is null)
+        if (games is null || !games.Any())
         {
-            _logger.LogWarning($"Games no longer exists.");
-            return NotFound("Tournament's Games no longer exists.");
+            _logger.LogWarning($"No games found for Tournament with ID {tournamentId}.");
+            return NotFound($"No games found for Tournament with ID {tournamentId}.");
         }
 
-        return Ok(_mapper.Map<IEnumerable<GameDto>>(games));
+        var gamesDto = _mapper.Map<IEnumerable<GameDto>>(games);
+
+        return Ok(gamesDto);
     }
 
-    // GET: api/Tournaments/{tournamentId}/Games/{gameId}
-    [HttpGet("{tournamentId:int}/Games/{gameId:int}")]
-    public async Task<ActionResult<GameDto>> GetGame(
-        int tournamentId,
-        int gameId)
+    // GET: api/Tournaments/{tournamentId}/Games
+    [HttpGet("{tournamentId}/Games/{gameId}")]
+    public async Task<ActionResult<GameDto>> GetGame(int tournamentId, int gameId)
     {
         var tournament = await _unitOfWork.TournamentRepository.GetAsync(tournamentId);
-
+   
         if (tournament is null)
         {
-            _logger.LogWarning($"Tournament with ID {tournamentId} no longer exists.");
-            return NotFound("Tournament no longer exists.");
+            _logger.LogWarning($"Tournament with ID {tournamentId} not found.");
+            return NotFound($"Tournament with ID {tournamentId} not found.");
         }
 
         var game = tournament.Games.FirstOrDefault(g => g.Id == gameId);
 
         if (game is null)
         {
-            _logger.LogWarning($"Game with ID {gameId} no longer exists.");
-            return NotFound("Game no longer exists.");
+            _logger.LogWarning($"Game with ID {gameId} not found in tournament with ID {tournamentId}.");
+            return NotFound($"Game with ID {gameId} not found in tournament with ID {tournamentId}.");
         }
 
         return Ok(_mapper.Map<GameDto>(game));
@@ -319,9 +269,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
     // POST: api/Tournaments
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost("{tournamentId}/Games")]
-    public async Task<ActionResult<TournamentDto>> PostGame(
-        int tournamentId,
-        GameDto gameDto)
+    public async Task<ActionResult<GameDto>> PostGame(int tournamentId, GameDto gameDto)
     {
         if (!ModelState.IsValid)
         {
@@ -333,26 +281,20 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
 
         if (tournament is null)
         {
-            _logger.LogWarning($"Tournament with ID {tournamentId} no longer exists.");
-            return NotFound("Tournament no longer exists.");
+            _logger.LogWarning($"Tournament with ID {tournamentId} not found.");
+            return NotFound($"Tournament with ID {tournamentId} not found.");
         }
 
         var game = _mapper.Map<Game>(gameDto);
 
-        if (game is null)
+        if (string.IsNullOrEmpty(game.Title) || game.Time == default)
         {
-            _logger.LogWarning($"Game with ID {gameDto.Id} no longer exists.");
-            return NotFound("Game no longer exists.");
-        }
+            string[] missing = {
+                string.IsNullOrEmpty(game.Title) ? "title missing" : "",
+                game.Time == default ? "time missing" : ""
+            };
 
-        if (game.Title is null || game.Time is null)
-        {
-            string[] missing = [
-                game.Title != null ? "" : "title missing",
-                game.Time != null ? "" : "StartDate missing"
-            ];
-
-            _logger.LogWarning($"Post tournament: Bad request! Missing required fields `{string.Join(',', missing)}`");
+            _logger.LogWarning($"Post game: Bad request! Missing required fields `{string.Join(", ", missing)}`");
             return BadRequest("Missing required fields");
         }
 
@@ -365,24 +307,18 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            if (!await _unitOfWork.GameRepository.AnyAsync(game.Id))
-            {
-                _logger.LogError("Post Game: Failed to create concurrent post.");
-                return StatusCode(500);
-            }
-
-            _logger.LogError(ex, "Concurrent update error occurred while creating game with ID {id}.", []);
+            _logger.LogError(ex, "Concurrent update error occurred while creating game with ID {GameId}.", game.Id);
             return StatusCode(500, "A concurrency error occurred.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while creating game with ID {id}.", []);
+            _logger.LogError(ex, "An error occurred while creating game with ID {GameId}.", game.Id);
             return StatusCode(500, "An unexpected error occurred.");
         }
 
         var createdGame = _mapper.Map<GameDto>(game);
 
-        return CreatedAtAction("GetGame", new { id = createdGame.Id }, createdGame);
+        return CreatedAtAction("GetGame", new { tournamentId = tournamentId, gameId = createdGame.Id }, createdGame);
     }
 
     // PUT: api/Tournaments/5
@@ -400,11 +336,33 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
         var gameId = dto.GameId;
         var tournament = await _unitOfWork.TournamentRepository.GetAsync(tournamentId);
 
-        if (tournament == null) return NotFound();
+        if (tournament is null)
+        {
+            _logger.LogWarning($"Tournament with ID {tournamentId} not found.");
+            return NotFound($"Tournament with ID {tournamentId} not found.");
+        }
+
         var game = _mapper.Map<Game>(dto);
 
-        if (tournament.Games.FirstOrDefault(game => game.Id == gameId) is null) return NotFound(game);
-        if (gameId != game.Id) return BadRequest();
+        if (game is null)
+        {
+            _logger.LogWarning($"Failed to map GameDto to Game object.");
+            return BadRequest("Failed to map GameDto to Game object.");
+        }
+
+        if (gameId != game.Id)
+        {
+            _logger.LogWarning($"Bad request: Game ID mismatch. Path ID: {gameId}, Body ID: {game.Id}.");
+            return BadRequest("Game ID mismatch.");
+        }
+
+        var existingGame = tournament.Games.FirstOrDefault(g => g.Id == gameId);
+
+        if (existingGame is null)
+        {
+            _logger.LogWarning($"Game with ID {gameId} not found in tournament.");
+            return NotFound($"Game with ID {gameId} not found in tournament.");
+        }
 
         _unitOfWork.GameRepository.ChangeState(game, EntityState.Modified);
 
@@ -414,18 +372,12 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            if (!await _unitOfWork.GameRepository.AnyAsync(game.Id))
-            {
-                _logger.LogError("Post Game: Failed to create concurrent post.");
-                return StatusCode(500);
-            }
-
-            _logger.LogError(ex, "Concurrent update error occurred while creating game with ID {id}.", []);
+            _logger.LogError(ex, $"Concurrent update error occurred while updating game with ID {gameId}.");
             return StatusCode(500, "A concurrency error occurred.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while creating game with ID {id}.", []);
+            _logger.LogError(ex, $"An error occurred while updating game with ID {gameId}.");
             return StatusCode(500, "An unexpected error occurred.");
         }
 
@@ -445,13 +397,18 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
         }
 
         var tournament = _mapper.Map<Tournament>(tournamentDto);
+
         if (tournament is null) return NotFound();
 
         var game = await _unitOfWork.GameRepository.GetAsync(gameId);
 
         if (game is null) return NotFound(gameId);
-        if (tournament.Games.FirstOrDefault(game => game.Id == gameId) is null) return NotFound();
-
+        if (tournament.Games.FirstOrDefault(game => game.Id == gameId) is null)
+        {
+            _logger.LogWarning($"Game with ID {gameId} not found in tournament.");
+            return NotFound($"Game with ID {gameId} not found in tournament.");
+        }
+        
         tournament.Games.Remove(game);
         _unitOfWork.GameRepository.Remove(game);
         _unitOfWork.GameRepository.ChangeState(game, EntityState.Deleted);
@@ -479,8 +436,4 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Tour
 
         return NoContent();
     }
-
-    // Generic method to check if an entity exists
-    private async Task<bool> Exists<T>(IRepository<T> repository, int id) where T : class
-        => await repository.AnyAsync(id);
 }
