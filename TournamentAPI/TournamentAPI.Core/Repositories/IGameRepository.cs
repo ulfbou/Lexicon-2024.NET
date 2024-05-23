@@ -1,13 +1,9 @@
-﻿using TournamentAPI.Core.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using TournamentAPI.Core.Entities;
 
 namespace TournamentAPI.Core.Repositories;
 
-public interface IGameRepository
+public interface IGameRepository : IRepository<Game>
 {
-    Task<IEnumerable<Game>> GetAllAsync();
-    Task<Game?> GetAsync(int id);
-    Task<bool> AnyAsync(int id);
-    void Add(Game game);
-    void Update(Game game);
-    void Remove(Game game);
 }
