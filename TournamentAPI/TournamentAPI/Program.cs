@@ -1,12 +1,10 @@
-using TournamentAPI.Core;
-using TournamentAPI.Data;
 using TournamentAPI.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using TournamentAPI.Data.Data;
+using Serilog;
 using TournamentAPI.Data.Repositories;
+using TournamentAPI.Core.Repositories;
 
-namespace TournamentAPI; 
+namespace TournamentAPI;
 
 public class Program
 {
@@ -14,8 +12,16 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddControllers().AddNewtonsoftJson();
-        builder.Services.AddDbContext<TournamentAPI.Data.Data.TournamentAPIContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("TournamentAPIContext") ?? throw new InvalidOperationException("Connection string 'TournamentAPIContext' not found.")));
+        //Log.Logger = new LoggerConfiguration()
+        //    .WriteTo.Console()
+        //    .CreateLogger();
+
+        //builder.Logging.ClearProviders();
+        //builder.Logging.AddSerilog(dispose: true);
+        builder.Services.AddDbContext<TournamentContext>(options =>
+            options.UseSqlServer(
+                builder.Configuration.GetConnectionString("TournamentAPIContext") ?? 
+                throw new InvalidOperationException("Connection string 'TournamentAPIContext' not found.")));
         builder.Services.AddScoped<IUoW, UoW>();
         builder.Services.AddAutoMapper(typeof(TournamentMappings));
 
@@ -34,12 +40,10 @@ public class Program
             app.UseSwaggerUI();
         }
 
+        //app.UseSerilogRequestLogging();
         app.UseHttpsRedirection();
-
         app.UseAuthorization();
-
         app.MapControllers();
-
         app.Run();
     }
 }
