@@ -7,18 +7,28 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.5" />
-    <PackageReference Include="microsoft.EntityFrameworkCore" Version="8.0.5" />
-    <PackageReference Include="microsoft.EntityFrameworkCore.design" Version="8.0.5">
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.design" Version="8.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="microsoft.EntityFrameworkCore.SqlServer" Version="8.0.5" />
-    <PackageReference Include="microsoft.EntityFrameworkCore.tools" Version="8.0.5">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.1" />
   </ItemGroup>
 
