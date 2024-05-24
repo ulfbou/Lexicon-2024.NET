@@ -360,3 +360,4 @@ MigrationBackup/
 .ionide/
 
 # Fody - auto-generated XML schema
+/TournamentAPI/TournamentAPI.Data/Migrations
