@@ -9,7 +9,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TournamentAPI.Data;
 public class SeedData
-{ 
+{
     private static readonly string TimeFormat = "yyyy-MM-dd HH:mm";
     private static Faker? faker = null;
 
@@ -52,7 +52,7 @@ public class SeedData
             var player1 = faker!.PickRandom(players);
             chosen.Add(player1);
 
-            var player2 = faker.PickRandom(players);  
+            var player2 = faker.PickRandom(players);
 
             while (chosen.Contains(player2))
             {
@@ -65,7 +65,7 @@ public class SeedData
             var game = new Game
             {
                 Title = title,
-                Time = startTime.ToString(TimeFormat)
+                Time = startTime.ToString()
             };
 
             games.Add(game);
@@ -96,7 +96,7 @@ public class SeedData
             var tournament = new Tournament
             {
                 Title = title,
-                StartDate = time.ToString(TimeFormat),
+                StartTime = time.ToString(),
                 Games = (ICollection<Game>)games
             };
 
