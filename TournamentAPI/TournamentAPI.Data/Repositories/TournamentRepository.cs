@@ -10,7 +10,19 @@ public class TournamentRepository(TournamentContext context) : Repository<Tourna
 {
     private readonly TournamentContext _context = context;
 
-    public virtual async Task<Tournament?> GetAsync(int id, bool include = true)
+
+    public async Task<IEnumerable<Tournament>?> GetAllAsync(bool include)
+    {
+        if (include)
+        {
+            return await Task.FromResult(_context.Tournament
+            .Include(t => t.Games));
+        }
+
+        return await Task.FromResult(_repository);
+    }
+
+    public async Task<Tournament?> GetAsync(int id, bool include = true)
     {
         if (include)
         {
@@ -19,20 +31,29 @@ public class TournamentRepository(TournamentContext context) : Repository<Tourna
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        return await _context.Tournament.FirstOrDefaultAsync(t => t.Id == id);
+        return await _repository.FirstOrDefaultAsync(t => t.Id == id);
     }
 
-    public override async Task<IEnumerable<Tournament>?> GetAllAsync()
-        => await Task.FromResult(_context.Tournament
-            .Include(t => t.Games));
-
-    public override async Task<IEnumerable<Tournament>?> FindAsync(Func<Tournament, bool> predicate)
-        => await Task.FromResult(_context.Tournament
+    public async Task<IEnumerable<Tournament>?> FindAsync(Func<Tournament, bool> predicate, bool include)
+    {
+        if (include)
+        {
+            return await Task.FromResult(_context.Tournament
             .Include(t => t.Games)
             .Where(predicate));
+        }
+        return await Task.FromResult(_repository.Where(predicate));
+    }
 
-    public override async Task<bool> AnyAsync(int id)
-        => await _context.Tournament
-            .Include(t => t.Games)
-            .AnyAsync(e => e.Id == id);
+    public async Task<bool> AnyAsync(int id, bool include)
+    {
+        if (include)
+        {
+            return await _context.Tournament
+                .Include(t => t.Games)
+                .AnyAsync(e => e.Id == id);
+        }
+
+        return await _repository.AnyAsync(e => e.Id == id);
+    }
 }

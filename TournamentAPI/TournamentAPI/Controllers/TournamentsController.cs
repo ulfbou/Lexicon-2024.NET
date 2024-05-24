@@ -18,13 +18,20 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
 
     // GET: api/Tournaments
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournaments(string? title)
+    public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournaments(string? title, bool? include = true)
     {
+        var inclusion = true;
+
+        if (include.HasValue)
+        {
+            inclusion = include.Value;
+        }
+
         if (!string.IsNullOrEmpty(title))
         {
             try
             {
-                var tournaments = await _unitOfWork.TournamentRepository.FindAsync(t => t.Title.Contains(title));
+                var tournaments = await _unitOfWork.TournamentRepository.FindAsync(t => t.Title.Contains(title), inclusion);
 
                 if (tournaments is null || !tournaments.Any())
                 {
@@ -43,7 +50,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
 
         try
         {
-            var tournaments = await _unitOfWork.TournamentRepository.GetAllAsync();
+            var tournaments = await _unitOfWork.TournamentRepository.GetAllAsync(inclusion);
 
             if (tournaments is null || !tournaments.Any())
             {
@@ -251,7 +258,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
 
     // GET: api/Tournaments/{id}/Games
     [HttpGet("{tournamentId}/Games")]
-    public async Task<ActionResult<IEnumerable<GameDto>>> GetGames(int tournamentId)
+    public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGames(int tournamentId, string title)
     {
         var tournament = await _unitOfWork.TournamentRepository.GetAsync(tournamentId);
 
@@ -267,6 +274,17 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
         {
             _logger.LogWarning($"No games found for Tournament with ID {tournamentId}.");
             return NotFound($"No games found for Tournament with ID {tournamentId}.");
+        }
+
+        if (!string.IsNullOrEmpty(title))
+        {
+            games = games.Where(g => g.Title.Contains(title)).ToList();
+
+            if (!games.Any())
+            {
+                _logger.LogWarning($"No games found for Tournament with ID {tournamentId} matching search string `{title}`.");
+                return NotFound($"No games found for Tournament with ID {tournamentId} matching search string `{title}`.");
+            }
         }
 
         var gamesDto = _mapper.Map<IEnumerable<GameDto>>(games);

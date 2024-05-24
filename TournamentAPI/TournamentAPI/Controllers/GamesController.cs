@@ -18,12 +18,29 @@ public class GamesController(IUoW unitOfWork, IMapper mapper, ILogger<GamesContr
 
     // GET: api/Tournaments
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GameDto>>> GetGames()
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<GameDto>>> GetGames(string? title)
     {
+        IEnumerable<Game>? games;
         try
         {
-            var games = await _unitOfWork.GameRepository.GetAllAsync();
+            if (string.IsNullOrEmpty(title))
+            {
+                games = await _unitOfWork.GameRepository.GetAllAsync();
+            }
+            else
+            {
+                games = await _unitOfWork.GameRepository.FindAsync(g => g.Title.Contains(title));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving games.");
+            return StatusCode(500, "Internal server error.");
+        }
 
+        try
+        {
             // Null check for games (though usually this should return an empty list)
             if (games is null || !games.Any())
             {
@@ -39,6 +56,7 @@ public class GamesController(IUoW unitOfWork, IMapper mapper, ILogger<GamesContr
             return StatusCode(500, "Internal server error.");
         }
     }
+
 
     // GET: api/Games/{id}
     [HttpGet("{id}")]
