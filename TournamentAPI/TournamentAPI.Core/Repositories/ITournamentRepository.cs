@@ -38,5 +38,8 @@ namespace TournamentAPI.Core.Repositories;
 
 public interface ITournamentRepository : IRepository<Tournament>
 {
+    public Task<IEnumerable<Tournament>?> GetAllAsync(bool inclusion);
+
+    public Task<IEnumerable<Tournament>?> FindAsync(Func<Tournament, bool> predicate, bool include = true);
     public Task<Tournament?> GetAsync(int id, bool include = true);
 }
