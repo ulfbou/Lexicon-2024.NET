@@ -17,6 +17,7 @@ public class GamesController(IUoW unitOfWork, IMapper mapper, ILogger<GamesContr
     private readonly ILogger<GamesController> _logger = logger;
 
     // GET: api/Tournaments
+    [HttpGet]
     public async Task<ActionResult<IEnumerable<GameDto>>> GetGames()
     {
         try
@@ -40,7 +41,6 @@ public class GamesController(IUoW unitOfWork, IMapper mapper, ILogger<GamesContr
     }
 
     // GET: api/Games/{id}
-    [HttpGet("{id:int}")]
     [HttpGet("{id}")]
     public async Task<ActionResult<GameDto>> GetGame(int id)
     {
@@ -100,7 +100,7 @@ public class GamesController(IUoW unitOfWork, IMapper mapper, ILogger<GamesContr
             return Conflict("Game with the same ID already exists.");
         }
 
-        _unitOfWork.GameRepository.Add(game);
+        await _unitOfWork.GameRepository.AddAsync(game);
         _unitOfWork.GameRepository.ChangeState(game, EntityState.Added);
 
         try
@@ -121,9 +121,6 @@ public class GamesController(IUoW unitOfWork, IMapper mapper, ILogger<GamesContr
         var createdGame = _mapper.Map<GameDto>(game);
         return CreatedAtAction("GetGame", new { id = createdGame.Id }, createdGame);
     }
-
-    // PUT: api/Games/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
 
     // PUT: api/Games/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

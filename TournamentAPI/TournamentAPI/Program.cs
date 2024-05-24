@@ -12,18 +12,18 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddControllers().AddNewtonsoftJson();
-        //Log.Logger = new LoggerConfiguration()
-        //    .WriteTo.Console()
-        //    .CreateLogger();
-
-        //builder.Logging.ClearProviders();
-        //builder.Logging.AddSerilog(dispose: true);
         builder.Services.AddDbContext<TournamentContext>(options =>
             options.UseSqlServer(
                 builder.Configuration.GetConnectionString("TournamentAPIContext") ?? 
                 throw new InvalidOperationException("Connection string 'TournamentAPIContext' not found.")));
         builder.Services.AddScoped<IUoW, UoW>();
         builder.Services.AddAutoMapper(typeof(TournamentMappings));
+        builder.Services
+            .AddControllers()
+            .AddNewtonsoftJson(options => {
+                options.SerializerSettings.Converters.Add(new DateFormatConverter());
+                options.SerializerSettings.ContractResolver = new CustomDateContractResolver();
+            });
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -40,7 +40,6 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        //app.UseSerilogRequestLogging();
         app.UseHttpsRedirection();
         app.UseAuthorization();
         app.MapControllers();

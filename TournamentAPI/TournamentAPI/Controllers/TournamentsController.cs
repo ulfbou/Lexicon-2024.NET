@@ -17,13 +17,34 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
     private readonly ILogger<GamesController> _logger = logger;
 
     // GET: api/Tournaments
-    public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournaments()
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournaments(string? title)
     {
+        if (!string.IsNullOrEmpty(title))
+        {
+            try
+            {
+                var tournaments = await _unitOfWork.TournamentRepository.FindAsync(t => t.Title.Contains(title));
+
+                if (tournaments is null || !tournaments.Any())
+                {
+                    _logger.LogWarning("No tournaments found matching {title}.", []);
+                    return NotFound("No tournaments found.");
+                }
+
+                return Ok(_mapper.Map<IEnumerable<TournamentDto>>(tournaments));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving tournaments.");
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
         try
         {
             var tournaments = await _unitOfWork.TournamentRepository.GetAllAsync();
 
-            // Null check for tournaments (though usually this should return an empty list)
             if (tournaments is null || !tournaments.Any())
             {
                 _logger.LogWarning("No tournaments found.");
@@ -40,13 +61,23 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
     }
 
     // GET: api/Tournaments/{id}
-    [HttpGet("{id:int}")]
     [HttpGet("{id}")]
-    public async Task<ActionResult<TournamentDto>> GetTournament(int id)
+    public async Task<ActionResult<TournamentDto>> GetTournament(int id, bool? inclusion)
     {
+        bool include;
+
+        if (inclusion.HasValue)
+        {
+            include = inclusion.Value;
+        }
+        else
+        {
+            include = true;
+        }
+
         try
         {
-            var tournament = await _unitOfWork.TournamentRepository.GetAsync(id);
+            var tournament = await _unitOfWork.TournamentRepository.GetAsync(id, include);
 
             if (tournament == null)
             {
@@ -83,11 +114,11 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
             return StatusCode(500, "Internal server error.");
         }
 
-        if (string.IsNullOrEmpty(tournament.Title) || tournament.StartDate == default || tournament.Games == null)
+        if (string.IsNullOrEmpty(tournament.Title) || tournament.StartTime == default || tournament.Games == null)
         {
             string[] missingFields = {
                 string.IsNullOrEmpty(tournament.Title) ? "title" : "",
-                tournament.StartDate == default ? "startDate" : "",
+                tournament.StartTime == default ? "startDate" : "",
                 tournament.Games is null ? "games" : ""
             };
 
@@ -101,7 +132,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
             return Conflict("Tournament with the same ID already exists.");
         }
 
-        _unitOfWork.TournamentRepository.Add(tournament);
+        await _unitOfWork.TournamentRepository.AddAsync(tournament);
         _unitOfWork.TournamentRepository.ChangeState(tournament, EntityState.Added);
 
         try
@@ -153,11 +184,11 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
             return BadRequest("Tournament ID mismatch.");
         }
 
-        if (string.IsNullOrEmpty(tournament.Title) || tournament.StartDate == default || tournament.Games == null)
+        if (string.IsNullOrEmpty(tournament.Title) || tournament.StartTime == default || tournament.Games == null)
         {
             string[] missingFields = {
                 string.IsNullOrEmpty(tournament.Title) ? "title" : "",
-                tournament.StartDate == default ? "startDate" : "",
+                tournament.StartTime == default ? "startDate" : "",
                 tournament.Games == null ? "games" : ""
             };
 
@@ -245,10 +276,10 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
 
     // GET: api/Tournaments/{tournamentId}/Games
     [HttpGet("{tournamentId}/Games/{gameId}")]
-    public async Task<ActionResult<GameDto>> GetGame(int tournamentId, int gameId)
+    public async Task<ActionResult<GameDto>> GetTournamentGame(int tournamentId, int gameId)
     {
         var tournament = await _unitOfWork.TournamentRepository.GetAsync(tournamentId);
-   
+
         if (tournament is null)
         {
             _logger.LogWarning($"Tournament with ID {tournamentId} not found.");
@@ -269,7 +300,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
     // POST: api/Tournaments
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost("{tournamentId}/Games")]
-    public async Task<ActionResult<GameDto>> PostGame(int tournamentId, GameDto gameDto)
+    public async Task<ActionResult<GameDto>> PostTournamentGame(int tournamentId, GameDto gameDto)
     {
         if (!ModelState.IsValid)
         {
@@ -299,7 +330,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
         }
 
         tournament.Games.Add(game);
-        _unitOfWork.GameRepository.Add(game);
+        await _unitOfWork.GameRepository.AddAsync(game);
 
         try
         {
@@ -324,7 +355,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
     // PUT: api/Tournaments/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{tournamentId}/Games/{gameId}")]
-    public async Task<IActionResult> PutGame(TournamentGameDto dto)
+    public async Task<IActionResult> PutTournamentGame(TournamentGameDto dto)
     {
         if (!ModelState.IsValid)
         {
@@ -386,7 +417,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
 
     // DELETE: api/Tournaments/5
     [HttpDelete("{tournamentId}/Games/{gameId}")]
-    public async Task<IActionResult> DeleteTournament(
+    public async Task<IActionResult> DeleteTournamentGame(
         TournamentDto tournamentDto,
         int gameId)
     {
@@ -408,7 +439,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
             _logger.LogWarning($"Game with ID {gameId} not found in tournament.");
             return NotFound($"Game with ID {gameId} not found in tournament.");
         }
-        
+
         tournament.Games.Remove(game);
         _unitOfWork.GameRepository.Remove(game);
         _unitOfWork.GameRepository.ChangeState(game, EntityState.Deleted);

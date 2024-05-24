@@ -5,9 +5,6 @@ using TournamentAPI.Data.Data;
 namespace TournamentAPI.Data.Repositories;
 
 // GameRepository.cs
-public class GameRepository : Repository<Game>, IGameRepository
+public class GameRepository(TournamentContext context) : Repository<Game>(context.Game), IGameRepository
 {
-    public GameRepository(TournamentContext context) : base(context.Game)
-    {
-    }
 }
