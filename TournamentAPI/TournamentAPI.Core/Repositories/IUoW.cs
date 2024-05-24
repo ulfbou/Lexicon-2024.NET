@@ -2,6 +2,7 @@
 
 public interface IUoW
 {
-    ITournamentRepository Repository { get; }
-    IGameRepository GameRepository { get; }  
+    ITournamentRepository TournamentRepository { get; }
+    IGameRepository GameRepository { get; }
+    Task CompleteAsync();
 }

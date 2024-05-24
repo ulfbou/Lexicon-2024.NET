@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace TournamentAPI.Data.Context
+namespace TournamentAPI
 {
     //public class LexiconUniversityContextFactory : IDesignTimeDbContextFactory<TournamentContext>
     //{
@@ -13,4 +13,4 @@ namespace TournamentAPI.Data.Context
     //        return new TournamentContext(options.Options);
     //    }
     //}
-} 
+}

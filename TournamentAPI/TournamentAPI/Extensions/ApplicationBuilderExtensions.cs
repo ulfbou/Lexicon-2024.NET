@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TournamentAPI.Core.Repositories;
 using TournamentAPI.Data.Data;
 
 namespace TournamentAPI.Extensions;
@@ -10,9 +11,9 @@ public static class WebAppExtensions
         using (var scope = app.ApplicationServices.CreateScope())
         {
             var serviceProvider = scope.ServiceProvider;
-            var context = serviceProvider.GetRequiredService<TournamentAPIContext>();
+            var context = serviceProvider.GetRequiredService<TournamentContext>();
 
-            await context.Database.EnsureDeletedAsync();
+            //await context.Database.EnsureDeletedAsync();
             await context.Database.MigrateAsync();
 
             try
@@ -24,7 +25,6 @@ public static class WebAppExtensions
                 Console.WriteLine(ex.Message);
                 throw;
             }
-
         }
     }
 }

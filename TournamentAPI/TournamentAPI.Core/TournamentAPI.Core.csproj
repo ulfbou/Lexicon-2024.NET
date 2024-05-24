@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Repositories\" />
+    <Reference Include="Microsoft.EntityFrameworkCore">
+      <HintPath>..\..\..\TournamentAPI\TournamentAPI\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

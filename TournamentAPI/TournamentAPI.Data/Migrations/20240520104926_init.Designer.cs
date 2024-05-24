@@ -11,7 +11,7 @@ using TournamentAPI.Data.Data;
 
 namespace TournamentAPI.Data.Migrations
 {
-    [DbContext(typeof(TournamentAPIContext))]
+    [DbContext(typeof(TournamentContext))]
     [Migration("20240520104926_init")]
     partial class init
     {
