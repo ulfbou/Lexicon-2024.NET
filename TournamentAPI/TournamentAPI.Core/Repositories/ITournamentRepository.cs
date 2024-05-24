@@ -38,4 +38,5 @@ namespace TournamentAPI.Core.Repositories;
 
 public interface ITournamentRepository : IRepository<Tournament>
 {
+    public Task<Tournament?> GetAsync(int id, bool include = true);
 }

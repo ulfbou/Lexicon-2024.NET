@@ -7,12 +7,13 @@ public interface IRepository<TEntity> where TEntity : IEntity
     /// Asynchronously retrieves all entities of type TEntity from the repository.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of TEntity.</returns>
-    Task<IEnumerable<TEntity>> GetAllAsync();
+    Task<IEnumerable<TEntity>?> GetAllAsync();
 
     /// <summary>
     /// Asynchronously retrieves an entity of type TEntity with the specified id from the repository.
     /// </summary>
     /// <param name="id">The id of the entity to retrieve.</param>
+    /// <param name="include">A boolean value that indicates whether to include related entities in the result.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the TEntity object if found, null otherwise.</returns>
     Task<TEntity?> GetAsync(int id);
 
