@@ -1,45 +1,46 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using TournamentAPI.Core.Entities;
 
 namespace TournamentAPI.Core.Repositories;
 
-/// <summary>
-/// Provides an interface for a repository that handles operations for Tournament entities.
-/// </summary>
-/// <remarks>
-/// This interface inherits methods from IRepository<Tournament>:
-/// <list type="bullet">
-/// <item>
-/// <description>GetAllAsync: Asynchronously retrieves all Tournament entities from the repository.</description>
-/// </item>
-/// <item>
-/// <description>GetAsync: Asynchronously retrieves a Tournament entity with the specified id from the repository.</description>
-/// </item>
-/// <item>
-/// <description>FindAsync: Asynchronously retrieves all Tournament entities that satisfy the specified predicate.</description>
-/// </item>
-/// <item>
-/// <description>AnyAsync: Asynchronously determines whether a Tournament entity with the specified id exists in the repository.</description>
-/// </item>
-/// <item>
-/// <description>Add: Adds the specified Tournament entity to the repository.</description>
-/// </item>
-/// <item>
-/// <description>Update: Updates the specified Tournament entity in the repository.</description>
-/// </item>
-/// <item>
-/// <description>Remove: Removes the specified Tournament entity from the repository.</description>
-/// </item>
-/// <item>
-/// <description>ChangeState: Changes the state of the specified Tournament entity in the repository.</description>
-/// </item>
-/// </list>
-/// </remarks>
-
 public interface ITournamentRepository : IRepository<Tournament>
 {
-    public Task<IEnumerable<Tournament>?> GetAllAsync(bool inclusion);
+    /// <summary>
+    /// Asynchronously retrieves all Tournament entities from the repository.
+    /// </summary>
+    /// <param name="include">A boolean value that indicates whether to include related entities in the result.</param>
+    /// <param name="searchQuery">A string that represents the search query to filter the results.</param>
+    /// <param name="pageIndex">The index of the page to retrieve.</param>
+    /// <param name="pageSize">The size of the page to retrieve.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of Tournament entities.</returns>
+    public Task<IEnumerable<Tournament>> GetAllAsync(bool include = true, string? searchQuery = null, int pageIndex = 0, int pageSize = 10);
 
-    public Task<IEnumerable<Tournament>?> FindAsync(Func<Tournament, bool> predicate, bool include = true);
+    /// <summary>
+    /// Asynchronously retrieves a Tournament entity with the specified id from the repository.
+    /// </summary>
+    /// <param name="predicate">A predicate that represents the results filter.</param>
+    /// <param name="include">A boolean value that indicates whether to include related entities in the result.</param>
+    /// <param name="searchQuery">A string that represents the search query to filter the results.</param>
+    /// <pagam name="pageIndex">The index of the page to retrieve.</param>
+    /// <param name="pageSize">The size of the page to retrieve.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of Tournament entities that satisfy the predicate.</returns>
+    public Task<IEnumerable<Tournament>> FindAsync(Expression<Func<Tournament, bool>>? predicate, bool include = true, string? searchQuery = null, int pageIndex = 0, int pageSize = 10);
+
+    /// <summary>
+    /// Asynchronously retrieves a Tournament entity with the specified id from the repository.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="include">A boolean value that indicates whether to include related entities in the result.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the Tournament object if found, null otherwise.</returns>
     public Task<Tournament?> GetAsync(int id, bool include = true);
+
+    /// <summary>
+    /// Gets the game with the specified game id from the tournament with the specified tournament id.
+    /// </summary>
+    /// <param name="tournamentId">An identifier for the specified tournament.</param>
+    /// <param name="gameId">An identifier for the specified game.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the Game object if found, null otherwise.</returns>
+    public Task<Game?> GetGameAsync(int tournamentId, int gameId);
+    Task<IEnumerable<Game>?> GetGamesAsync(int tournamentId, string? title = null, int pageIndex = 0, int pageSize = 10);
 }

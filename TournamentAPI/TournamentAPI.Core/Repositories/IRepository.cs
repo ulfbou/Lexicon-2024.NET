@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using TournamentAPI.Core.Entities;
 
 public interface IRepository<TEntity> where TEntity : IEntity
@@ -6,23 +7,31 @@ public interface IRepository<TEntity> where TEntity : IEntity
     /// <summary>
     /// Asynchronously retrieves all entities of type TEntity from the repository.
     /// </summary>
+    /// <param name="searchQuery">A string that represents the search query to filter the results.</param>
+    /// <param name="pageIndex">The index of the page to retrieve.</param>
+    /// <param name="pageSize">The size of the page to retrieve.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of TEntity.</returns>
-    Task<IEnumerable<TEntity>?> GetAllAsync();
-
-    /// <summary>
-    /// Asynchronously retrieves an entity of type TEntity with the specified id from the repository.
-    /// </summary>
-    /// <param name="id">The id of the entity to retrieve.</param>
-    /// <param name="include">A boolean value that indicates whether to include related entities in the result.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the TEntity object if found, null otherwise.</returns>
-    Task<TEntity?> GetAsync(int id);
+    Task<IEnumerable<TEntity>?> GetAllAsync(string? searchQuery = null, int pageIndex = 0, int pageSize = 10);
 
     /// <summary>
     /// Asynchronously retrieves all entities of type TEntity that satisfy the specified predicate.
     /// </summary>
     /// <param name="predicate">A function to test each element for a condition.</param>
+    /// <param name="searchQuery">A string that represents the search query to filter the results.</param>
+    /// <param name="pageIndex">The index of the page to retrieve.</param>
+    /// <param name="pageSize">The size of the page to retrieve.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of TEntity that satisfy the predicate.</returns>
-    Task<IEnumerable<TEntity>?> FindAsync(Func<TEntity, bool> predicate);
+    Task<IEnumerable<TEntity>?> FindAsync(Expression<Func<TEntity, bool>>? predicate = null, int pageIndex = 0, int pageSize = 10);
+
+    /// <summary>
+    /// Asynchronously retrieves an entity of type TEntity with the specified id from the repository.
+    /// </summary>
+    /// <param name="id">The id of the entity to retrieve.</param>
+    /// <param name="searchQuery">A string that represents the search query to filter the results.</param>
+    /// <param name="pageIndex">The index of the page to retrieve.</param>
+    /// <param name="pageSize">The size of the page to retrieve.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the TEntity object if found, null otherwise.</returns>
+    Task<TEntity?> GetAsync(int id);
 
     /// <summary>
     /// Asynchronously determines whether an entity of type TEntity with the specified id exists in the repository.

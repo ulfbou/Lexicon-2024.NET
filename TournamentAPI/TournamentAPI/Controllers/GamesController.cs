@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using TournamentAPI.Core.Dto;
 using TournamentAPI.Core.Repositories;
 using TournamentAPI.Core.Entities;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace TournamentAPI.Controllers;
 
@@ -19,18 +20,24 @@ public class GamesController(IUoW unitOfWork, IMapper mapper, ILogger<GamesContr
     // GET: api/Tournaments
     [HttpGet]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GameDto>>> GetGames(string? title)
+    public async Task<ActionResult<IEnumerable<GameDto>>?> GetGames(string? title, int pageIndex = 0, int pageSize = 10)
     {
         IEnumerable<Game>? games;
+
+        if (!string.IsNullOrWhiteSpace(title))
+        {
+            title = title.Trim();
+        }
+
         try
         {
             if (string.IsNullOrEmpty(title))
             {
-                games = await _unitOfWork.GameRepository.GetAllAsync();
+                games = await _unitOfWork.GameRepository.GetAllAsync(null, pageIndex, pageSize);
             }
             else
             {
-                games = await _unitOfWork.GameRepository.FindAsync(g => g.Title.Contains(title));
+                games = await _unitOfWork.GameRepository.FindAsync(g => g.Title.Contains(title), pageIndex, pageSize);
             }
         }
         catch (Exception ex)
@@ -95,9 +102,9 @@ public class GamesController(IUoW unitOfWork, IMapper mapper, ILogger<GamesContr
 
         var game = _mapper.Map<Game>(gameDto);
 
-        if (game == null)
+        if (game is null)
         {
-            _logger.LogWarning("Mapping error: GameDto could not be mapped to Game.");
+            _logger.LogWarning($"Mapping error: GameDto could not be mapped to unidentified Game.");
             return StatusCode(500, "Internal server error.");
         }
 
@@ -127,12 +134,12 @@ public class GamesController(IUoW unitOfWork, IMapper mapper, ILogger<GamesContr
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            _logger.LogError(ex, "Concurrent update error occurred while creating game with ID {game.Id}.", []);
+            _logger.LogError(ex, $"Concurrent update error occurred while creating game with ID {game.Id}.");
             return StatusCode(500, "A concurrency error occurred.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while creating game with ID {game.Id}.", []);
+            _logger.LogError(ex, $"An error occurred while creating game with ID {game.Id}.");
             return StatusCode(500, "An unexpected error occurred.");
         }
 
@@ -225,6 +232,66 @@ public class GamesController(IUoW unitOfWork, IMapper mapper, ILogger<GamesContr
         catch (Exception ex)
         {
             _logger.LogError(ex, $"An error occurred while deleting game with ID {id}.");
+            return StatusCode(500, "An unexpected error occurred.");
+        }
+
+        return NoContent();
+    }
+
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> PatchGame(int id, JsonPatchDocument<GameDto> patchDoc)
+    {
+        if (!ModelState.IsValid)
+        {
+            _logger.LogWarning($"Invalid model state for the GameDto with '{id}'.");
+            return BadRequest(ModelState);
+        }
+
+        if (patchDoc is null)
+        {
+            _logger.LogWarning($"Invalid patch document for id '{id}'.");
+            return BadRequest("Invalid patch document.");
+        }
+
+        var game = await _unitOfWork.GameRepository.GetAsync(id);
+
+        if (game is null)
+        {
+            _logger.LogWarning($"Game with ID {id} not found.");
+            return NotFound("Game not found.");
+        }
+
+        var gameDto = _mapper.Map<GameDto>(game);
+
+        if (gameDto is null)
+        {
+            _logger.LogWarning($"Mapping error: Game with id '{id}' could not be mapped to GameDto.");
+            return StatusCode(500, "Internal server error.");
+        }
+
+        patchDoc.ApplyTo(gameDto, ModelState);
+
+        if (!TryValidateModel(gameDto))
+        {
+            _logger.LogWarning("Invalid model state for the GameDto.");
+            return BadRequest(ModelState);
+        }
+
+        _mapper.Map(gameDto, game);
+        _unitOfWork.GameRepository.ChangeState(game, EntityState.Modified);
+
+        try
+        {
+            await _unitOfWork.CompleteAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _logger.LogError(ex, $"Concurrent update error occurred while updating game with ID {id}.", id);
+            return StatusCode(500, "A concurrency error occurred.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"An error occurred while updating game with ID {id}.", id);
             return StatusCode(500, "An unexpected error occurred.");
         }
 
