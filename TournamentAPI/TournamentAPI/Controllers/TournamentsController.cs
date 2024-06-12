@@ -6,6 +6,7 @@ using TournamentAPI.Core.Dto;
 using TournamentAPI.Core.Repositories;
 using TournamentAPI.Core.Entities;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TournamentAPI.Controllers;
 
@@ -19,6 +20,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
 
     // GET: api/Tournaments
     [HttpGet]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournaments(string? title, bool? inclusion = true, int pageIndex = 1, int pageSize = 10)
     {
         bool include = true;
@@ -57,6 +59,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
 
     // GET: api/Tournaments/{id}
     [HttpGet("{id}")]
+    [Authorize]
     public async Task<ActionResult<TournamentDto>> GetTournament(int id, bool? inclusion)
     {
         bool include = true;
@@ -86,6 +89,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
     // POST: api/Tournaments
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<TournamentDto>> PostTournament(TournamentDto tournamentDto)
     {
         if (!ModelState.IsValid)
@@ -148,6 +152,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
     // PUT: api/Tournaments/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
+    [Authorize]
     public async Task<IActionResult> PutTournament(int id, TournamentDto dto)
     {
         if (!ModelState.IsValid)
@@ -206,6 +211,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
 
     // DELETE: api/Tournaments/5
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<IActionResult> DeleteTournament(int id)
     {
         var tournament = await _unitOfWork.TournamentRepository.GetAsync(id);
@@ -239,6 +245,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
 
     // Generate httppatch method for updating a tournament
     [HttpPatch("{id}")]
+    [Authorize]
     public async Task<IActionResult> PatchTournament(int id, JsonPatchDocument<TournamentDto> patchDoc)
     {
         if (patchDoc is null)
@@ -272,6 +279,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
 
     // GET: api/Tournaments/{id}/Games
     [HttpGet("{tournamentId}/Games")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<GameDto>>> GetTournamentGames(
         int tournamentId,
         string? title,
@@ -310,6 +318,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
 
     // GET: api/Tournaments/{tournamentId}/Games
     [HttpGet("{tournamentId}/Games/{gameId}")]
+    [Authorize]
     public async Task<ActionResult<GameDto>> GetTournamentGame(int tournamentId, int gameId)
     {
         var tournament = await _unitOfWork.TournamentRepository.GetAsync(tournamentId);
@@ -334,6 +343,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
     // POST: api/Tournaments
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost("{tournamentId}/Games")]
+    [Authorize]
     public async Task<ActionResult<GameDto>> PostTournamentGame(int tournamentId, GameDto gameDto)
     {
         if (!ModelState.IsValid)
@@ -389,6 +399,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
     // PUT: api/Tournaments/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{tournamentId}/Games/{gameId}")]
+    [Authorize]
     public async Task<IActionResult> PutTournamentGame(int tournamentId, TournamentGameDto dto)
     {
         if (!ModelState.IsValid)
@@ -450,6 +461,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
 
     // DELETE: api/Tournaments/5
     [HttpDelete("{tournamentId}/Games/{gameId}")]
+    [Authorize]
     public async Task<IActionResult> DeleteTournamentGame(
         TournamentDto tournamentDto,
         int gameId)
@@ -503,6 +515,7 @@ public class TournamentsController(IUoW unitOfWork, IMapper mapper, ILogger<Game
 
     // Generate httppatch method for updating a game
     [HttpPatch("{tournamentId}/Games/{gameId}")]
+    [Authorize]
     public async Task<IActionResult> PatchTournamentGame(int tournamentId, int gameId, JsonPatchDocument<GameDto> patchDoc)
     {
         if (patchDoc is null)
