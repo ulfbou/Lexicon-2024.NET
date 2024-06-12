@@ -49,7 +49,7 @@ namespace MachineryFleet.Core.Services
 
             if (machine is null) throw new InvalidOperationException($"Machine with id {id} not found");
 
-            machine.LogEntries.Add($"{timeStamp.Value:yyyy-MM-dd HH:mm:ss}: {logEntry}");
+            machine.LogEntries.Add($"{timeStamp.Value:yyyy-MM-dd HH:mm:ss} {logEntry}");
 
             var entry = await _machineRepository.UpdateAsync(machine, _cancellation);
 
