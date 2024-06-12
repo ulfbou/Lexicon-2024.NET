@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Zentient.Extensions" Version="1.0.0-beta" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Entities\" />
+	</ItemGroup>
+
+</Project>

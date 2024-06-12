@@ -1,0 +1,48 @@
+﻿@page "/tasks"
+@using TaskManager.Persistence.Services
+@inject TaskService TaskService
+
+<PageTitle>Task List</PageTitle>
+
+<h3>Task List</h3>
+
+<button class="btn btn-primary" @onclick="AddTask">Add Task</button>
+
+<DataGrid Items="tasks" TItem="TaskModel" GridLines="GridLines.Both">
+    <Columns>
+        <DataGridColumn TItem="TaskModel" Field="task.Title" Title="Title" />
+        <DataGridColumn TItem="TaskModel" Field="task.DueDate" Title="Due Date" />
+        <DataGridColumn TItem="TaskModel" Field="task.Priority" Title="Priority" />
+        <DataGridColumn TItem="TaskModel">
+            <Template>
+                <button class="btn btn-warning" @onclick="() => EditTask(task.Id)">Edit</button>
+                <button class="btn btn-danger" @onclick="() => DeleteTask(task.Id)">Delete</button>
+            </Template>
+        </DataGridColumn>
+    </Columns>
+</DataGrid>
+
+@code {
+    private List<TaskModel> tasks;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tasks = await TaskService.GetTasksAsync();
+    }
+
+    private void AddTask()
+    {
+        // Logic to navigate to the task creation page or show a modal
+    }
+
+    private void EditTask(int taskId)
+    {
+        // Logic to navigate to the task editing page or show a modal
+    }
+
+    private async Task DeleteTask(int taskId)
+    {
+        await TaskService.DeleteTaskAsync(taskId);
+        tasks = await TaskService.GetTasksAsync();
+    }
+}

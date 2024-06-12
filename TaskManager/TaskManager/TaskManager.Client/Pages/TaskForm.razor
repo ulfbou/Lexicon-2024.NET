@@ -1,0 +1,54 @@
+﻿@page "/taskform"
+@using TaskManager.Core.Models
+@using TaskManager.Persistence.Services
+@inject TaskService TaskService
+
+<EditForm Model="@task" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="title">Title</label>
+        <InputText id="title" class="form-control" @bind-Value="task.Title" />
+        <ValidationMessage For="@(() => task.Title)" />
+    </div>
+
+    <div class="form-group">
+        <label for="dueDate">Due Date</label>
+        <InputDate id="dueDate" class="form-control" @bind-Value="task.DueDate" />
+        <ValidationMessage For="@(() => task.DueDate)" />
+    </div>
+
+    <div class="form-group">
+        <label for="priority">Priority</label>
+        <InputNumber id="priority" class="form-control" @bind-Value="task.Priority" />
+        <ValidationMessage For="@(() => task.Priority)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public TaskModel task { get; set; }
+
+    [Inject]
+    public TaskService TaskService { get; set; }
+
+    [Inject]
+    public NavigationManager Navigation { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+        if (task.Id == 0)
+        {
+            await TaskService.AddTaskAsync(task);
+        }
+        else
+        {
+            await TaskService.UpdateTaskAsync(task);
+        }
+
+        Navigation.NavigateTo("/tasks");
+    }
+}

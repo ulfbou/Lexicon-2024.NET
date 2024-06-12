@@ -1,0 +1,29 @@
+@page "/task/{taskId:int}"
+@inject TaskManager.Core.TaskService TaskService
+@inject NavigationManager Navigation
+@using TaskManager.Core.Models
+
+<PageTitle>Task Detail</PageTitle>
+
+<h3>Task Detail</h3>
+
+<TaskDisplay Task="task" />
+
+<button class="btn btn-secondary" @onclick="GoBack">Back</button>
+
+@code {
+    [Parameter]
+    public int taskId { get; set; }
+
+    private TaskModel task;
+
+    protected override async Task OnInitializedAsync()
+    {
+        task = await TaskService.GetTaskAsync(taskId);
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/tasks");
+    }
+}
