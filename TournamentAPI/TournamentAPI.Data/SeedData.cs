@@ -20,7 +20,7 @@ public class SeedData
         await Console.Out.WriteLineAsync($"Init SeedData beginning at {DateTime.Now}...");
         faker = new Faker("sv");
 
-        var tournaments = GenerateTournament(20);
+        var tournaments = GenerateTournament(2);
         await context.AddRangeAsync(tournaments);
         foreach (var tournament in tournaments)
         {
@@ -31,15 +31,42 @@ public class SeedData
         await Console.Out.WriteLineAsync($"Init SeedData completed at {DateTime.Now}...");
     }
 
-    private static IEnumerable<string> GeneratePlayerNames(int numberOfPlayers)
+    private static IEnumerable<string> GeneratePlayerNames(int numberOfPlayers, Name.Gender? gender = null)
     {
+        Name.Gender gen = gender ?? ((new Random().Next() & 1) > 0 ? Name.Gender.Male : Name.Gender.Female);
+
         for (int i = 0; i < numberOfPlayers; i++)
         {
-            yield return $"{faker!.Name.FirstName()} {faker.Name.LastName()}";
+            yield return $"{faker!.Name.FirstName(gen)} {faker.Name.LastName()}";
         }
     }
 
-    private static IEnumerable<Game> GenerateGames(int numberOfGames, IEnumerable<string> players, DateTime time)
+    private static IEnumerable<Tournament> GenerateTournament(int numberOfTournaments, Name.Gender? gender = null)
+    {
+        Name.Gender gen = gender ?? ((new Random().Next() & 1) > 0 ? Name.Gender.Male : Name.Gender.Female);
+        var tournaments = new List<Tournament>(numberOfTournaments);
+        var players = GeneratePlayerNames(numberOfTournaments * 4, gender);
+
+        for (int i = 0; i < numberOfTournaments; i++)
+        {
+            var title = faker!.Company.CompanyName() + " " + (gen == Name.Gender.Male ? "Men's" : "Women's") + " Cup";
+            var time = DateTime.Today.AddHours(9).AddDays(30);
+            var games = GenerateGames(8, players, time!, gen);
+
+            var tournament = new Tournament
+            {
+                Title = title,
+                StartTime = time.ToString(),
+                Games = (ICollection<Game>)games
+            };
+
+            tournaments.Add(tournament);
+        }
+
+        return tournaments;
+    }
+
+    private static IEnumerable<Game> GenerateGames(int numberOfGames, IEnumerable<string> players, DateTime time, Name.Gender gender)
     {
         var games = new List<Game>();
         var chosen = new HashSet<string>();
@@ -86,12 +113,13 @@ public class SeedData
     {
         var tournaments = new List<Tournament>(numberOfTournaments);
         var players = GeneratePlayerNames(numberOfTournaments * 4);
+        var genders = new[] { Name.Gender.Female, Name.Gender.Male };
 
         for (int i = 0; i < numberOfTournaments; i++)
         {
             var title = faker!.Company.CompanyName() + " Cup";
             var time = DateTime.Today.AddHours(9).AddDays(30);
-            var games = GenerateGames(8, players, time!);
+            var games = GenerateGames(8, players, time!, faker.PickRandom<Name.Gender>(genders));
 
             var tournament = new Tournament
             {
