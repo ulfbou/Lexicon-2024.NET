@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 /TournamentAPI/TournamentAPI.Data/Migrations
+/MachineryFleet360
+/TaskManagerV1
+/MachineryFleet/Components2

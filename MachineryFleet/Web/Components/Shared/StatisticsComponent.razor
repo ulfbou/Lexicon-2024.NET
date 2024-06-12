@@ -1,0 +1,61 @@
+﻿@* 
+Components
+- Layout
+  - MainLayout.razor
+  - NavMenu.razor
+  - NavManu.razor.css
+- Pages
+  - _Host.cshtml
+  - Error.razor
+  - Home.razor
+  - Machinery.razor
+- Shared
+  - StatisticsComponent.razor
+    - StatisticsComponent.razor.css
+- _Imports.razor
+- _Layout.cshtml
+- App.razor
+- Routes.razor
+ *@
+@page "/statistics"
+@rendermode InteractiveServer
+@using MachineryFleet.Core.Entities
+@using MachineryFleet.Core.Services
+@inject IMachineService MachineService
+
+@if (Machines is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="statistics-container">
+        <h3>Fleet Statistics</h3>
+        <ul class="list-group">
+            <li class="list-group-item">Total Machines: @TotalMachines</li>
+            <li class="list-group-item">Online Machines: @OnlineMachines</li>
+            <li class="list-group-item">Offline Machines: @OfflineMachines</li>
+        </ul>
+    </div>
+}
+@code {
+    private IEnumerable<Machine>? Machines;
+    private int TotalMachines;
+    private int OnlineMachines;
+    private int OfflineMachines;
+    // private string LastEditedMachine;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UpdateStatistics();
+    }
+
+    private async Task UpdateStatistics()
+    {
+        Machines = await MachineService.GetAllAsync();
+        TotalMachines = Machines.Count();
+        OnlineMachines = Machines.Count(m => m.Status == MachineStatus.Online);
+        OfflineMachines = Machines.Count(m => m.Status == MachineStatus.Offline);
+        // LastEditedMachine = machines.OrderByDescending(m => m.LastModified).FirstOrDefault()?.Name;
+    }
+}

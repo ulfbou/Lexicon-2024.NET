@@ -1,0 +1,55 @@
+﻿@rendermode InteractiveServer
+@using MachineryFleet.Core.Entities
+@using MachineryFleet.Core.Services
+@inject IMachineService MachineService
+
+@if (Machines is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card">
+        <div class="card-header">
+            <h3>Fleet Statistics</h3>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                <li class="list-group-item">Total Machines: @TotalMachines</li>
+                <li class="list-group-item">Online Machines: @OnlineMachines</li>
+                <li class="list-group-item">Offline Machines: @OfflineMachines</li>
+            </ul>
+        </div>
+    </div>
+}
+
+@code {
+    private IEnumerable<Machine>? Machines;
+
+    [Parameter]
+    public int TotalMachines {get; set;}
+    [Parameter]
+    public int OnlineMachines {get; set;}
+    public int OfflineMachines => TotalMachines - OnlineMachines;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("OnInitializedAsync");
+        MachineService.OnDatabaseChangedAsync += UpdateStatisticsAsync;
+        await UpdateStatisticsAsync();
+    }
+
+    public void Dispose()
+    {
+        MachineService.OnDatabaseChangedAsync -= UpdateStatisticsAsync;
+    }
+    private async Task UpdateStatisticsAsync()
+    {
+        Console.WriteLine("UpdateStatisticsAsync");
+        Machines = await MachineService.GetAllAsync();
+        TotalMachines = Machines.Count();
+        OnlineMachines = Machines.Count(m => m.Status == MachineStatus.Inactive);
+
+        StateHasChanged();
+    }
+}
