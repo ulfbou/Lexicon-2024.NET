@@ -1,0 +1,59 @@
+/* Apply Roboto to Navbar */
+.navbar {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Apply Lato to main content */
+body {
+    font-family: 'Lato', sans-serif;
+}
+
+/* Apply Montserrat to headers */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Apply Open Sans to statistics component */
+.statistics-component {
+    font-family: 'Open Sans', sans-serif;
+}
+
+/* Apply Source Sans Pro to log entries and other detailed text */
+.log-entries {
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+.logotype {
+    font-family: "Playfair Display", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
+
+    .logotype.header {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #7fbfff; /* light blue */
+        font-weight: 800;
+    }
+
+    .logotype.navbar {
+        font-weight: 600;
+    }
+
+.card.details {
+    margin-top: 1rem;
+}
+
+.card-header.details {
+    /*background-color: #3a0647;*/
+    /*color: white;*/
+}
+
+.card-body.details {
+    padding: 1rem;
+}
+
+.navbar {
+    font-family: 'Roboto', sans-serif;
+}

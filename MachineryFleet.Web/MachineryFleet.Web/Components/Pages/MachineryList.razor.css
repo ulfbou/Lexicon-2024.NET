@@ -1,0 +1,16 @@
+﻿.machine-list-container {
+    font-size: .85em;
+}
+
+    .machine-list-container .actions-column {
+        width: 25%;
+    }
+
+        .machine-list-container .actions-column button {
+            font-size: .75rem;
+        }
+
+        .machine-list-container .actions-column .btn.btn-info {
+            color: #fff;
+            background-color: #27a0c3 !important;
+        }

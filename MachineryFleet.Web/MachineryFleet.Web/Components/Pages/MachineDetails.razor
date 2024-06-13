@@ -1,0 +1,64 @@
+﻿@page "/machine-details/{id}"
+@using MachineryFleet.Core.Entities
+@using MachineryFleet.Core.Services
+@inject IMachineService MachineService
+
+@if (Machine == null)
+{
+    <p>Loading...</p>
+}
+else if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        <p>
+            <strong>Error:</strong> @ErrorMessage
+        </p>
+    </div>
+}
+else
+{
+    <h1>Machine Details</h1>
+    <div class="card details">
+        <div class="card-header details">
+            <h2>@Machine.Name</h2>
+        </div>
+        <div class="card-body details">
+            <p><strong>Status:</strong> @Machine.Status</p>
+            <h4>Log Entries</h4>
+            <ul>
+                @foreach (var log in Machine.LogEntries)
+                {
+                    <li class="log-entries">@log</li>
+                }
+            </ul>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private Machine? Machine = null;
+    private string ErrorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMachine();
+    }
+
+    private async Task LoadMachine()
+    {
+        Guid machineId;
+        if (Guid.TryParse(Id, out machineId))
+        {
+            Machine = await MachineService.GetAsync(machineId);
+        }
+        else
+        {
+            ErrorMessage = $"Invalid machine ID: {Id}";
+        }
+
+        await Task.CompletedTask;
+    }
+}

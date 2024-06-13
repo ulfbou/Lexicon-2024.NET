@@ -1,0 +1,206 @@
+﻿@page "/machines"
+@rendermode InteractiveServer
+@using MachineryFleet.Web.Components.Pages
+@using MachineryFleet.Core.Entities
+@using MachineryFleet.Core.Services
+@using MachineryFleet.Web.Components.Shared
+@inject IMachineService MachineService
+@inject NavigationManager NavigationManager
+
+@if (Machines is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="machine-list-container">
+        <h3>Machines</h3>
+        @* <button class="btn btn-primary mb-3" @onclick="AddMachine">Add Machine</button> *@
+        <AddMachineModal OnMachineAdded="AddMachine" />
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>ID</th>
+                    <th>Status</th>
+                    <th>Latest Data</th>
+                    <th class="actions-column">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var machine in Machines)
+                {
+                    <tr>
+                        <td>@machine.Name</td>
+                        <td>@machine.Id</td>
+                        <td>@machine.Status</td>
+                        @if (!ErrorMessages.ContainsKey(machine.Id) || string.IsNullOrEmpty(ErrorMessages[machine.Id]))
+                        {
+                            <td>@machine.LogEntries?.LastOrDefault()</td>
+                        }
+                        else 
+                        {
+                            <td class="text-danger">@ErrorMessages[machine.Id]</td>
+                        }
+                        <td class="actions-column">
+                            <button class="btn btn-primary btn-sm" @onclick="() => NavigateToDetails(machine.Id)">Details</button>
+                            <button class="btn btn-success btn-sm" @onclick="() => StartMachine(machine.Id)">Start</button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => StopMachine(machine.Id)">Stop</button>
+                            <button class="btn btn-info btn-sm" @onclick="() => SendData(machine.Id)">Send Data</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private IList<Machine>? Machines;
+    private Dictionary<Guid, string> ErrorMessages { get; set; } = new Dictionary<Guid, string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMachines();
+    }
+
+    private async Task LoadMachines()
+    {
+        Machines = await MachineService.GetAllAsync() as IList<Machine>;
+        await Task.CompletedTask;
+    }
+
+    private void NavigateToDetails(Guid id)
+    {
+        try
+        {
+            NavigationManager.NavigateTo($"/machine-details/{id.ToString()}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message); // Log the exception message
+        }
+    }
+
+    private async Task AddMachine(Machine newMachine)
+    {
+        try
+        {
+            await MachineService.AddAsync(newMachine);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // TODO : Handle exception
+        }
+
+        await LoadMachines();
+
+        await Task.CompletedTask;
+    }
+
+    private async Task StartMachine(Guid machineId)
+    {
+        Machine? machine;
+
+        try
+        {
+            machine = await MachineService.GetAsync(machineId);
+        }
+        catch (InvalidOperationException ex)
+        {
+            ErrorMessages[machineId] = ex.Message;
+            return;
+        }
+
+        if (machine is null)
+        {
+            ErrorMessages[machineId] = $"Machine with ID `{machineId}` does not exist.";
+            return;
+        }
+
+        if (machine.Status == MachineStatus.Inactive)
+        {
+            try
+            {
+                await MachineService.StartAsync(machineId);
+                await MachineService.AddLogEntryAsync(machineId, $"Machine {machine.Name} `{machine.Id}` started.");
+            }
+            catch(InvalidOperationException ex)
+            {
+                ErrorMessages[machineId] = ex.Message;
+                return;
+            }
+        }
+        else
+        {
+            ErrorMessages[machineId] = $"The machine {machine.Name} with ID `{machineId}` is already online.";
+            return;
+        }
+
+        ErrorMessages[machineId] = string.Empty;
+
+        await MachineService.NotifyDatabaseChangedAsync();
+        await Task.CompletedTask;
+    }
+
+    private async Task StopMachine(Guid machineId)
+    {
+        Machine? machine;
+
+        try
+        {
+            machine = await MachineService.GetAsync(machineId);
+        }
+        catch (InvalidOperationException ex)
+        {
+            ErrorMessages[machineId] = ex.Message;
+            return;
+        }
+
+        if (machine is null)
+        {
+            ErrorMessages[machineId] = $"The machine with ID `{machineId}` does not exist.";
+            return;
+        }
+
+        if (machine.Status == MachineStatus.Active)
+        {
+            try
+            {
+                await MachineService.StopAsync(machineId);
+                await MachineService.AddLogEntryAsync(machineId, $"Machine {machine.Name} `{machine.Id}` stopped.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                ErrorMessages[machineId] = ex.Message;
+                return;
+            }
+        }
+        else
+        {
+            ErrorMessages[machineId] = $"The machine {machine.Name} with ID `{machineId}` is already offline.";
+            return;
+        }
+
+        ErrorMessages[machineId] = string.Empty;
+
+        await MachineService.NotifyDatabaseChangedAsync();
+        await Task.CompletedTask;
+    }
+
+    private async Task SendData(Guid machineId)
+    {
+        var machine = await MachineService.GetAsync(machineId);
+
+        if (machine is null)
+        {
+            ErrorMessages[machineId] = $"The machine with ID `{machineId}` does not exist.";
+            return;
+        };
+
+        var random = new Random();
+        MachineService.LogType logType = (MachineService.LogType)random.Next(0, 4);
+        await MachineService.SendDataToLog(machine, logType, new Random().Next(0, 100));
+        await Task.CompletedTask;
+    }
+}
