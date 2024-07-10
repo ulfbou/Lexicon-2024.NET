@@ -1,0 +1,21 @@
+﻿.bi-plus-circle {
+    padding-right: 5px;
+    font-size: 16px;
+}
+
+.add-course {
+    color: white;
+    transition: 0.3s;
+}
+
+    .add-course:hover {
+        color: #23B0FF;
+    }
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+    --bs-table-accent-bg: #5C5C5C;
+}
+
+.table-dark {
+    --bs-table-bg: #494949;
+}

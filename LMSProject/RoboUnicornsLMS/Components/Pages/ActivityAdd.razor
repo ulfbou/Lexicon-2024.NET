@@ -1,0 +1,92 @@
+﻿@page "/module/{ModuleId:int}/activityadd"
+@attribute [Authorize(Policy = ApplicationPolicy.RequireTeacherRole)]
+@using Microsoft.AspNetCore.Authorization
+@using LMS.api.DTO
+@using RoboUnicornsLMS.Services
+@inject IActivityRequestService ActivityRequestService
+@rendermode InteractiveServer
+
+<h3>Add New Activity</h3>
+
+@if (!IsSaved) {
+    <form method="post" data-enhance @onsubmit="OnSubmit" @formname="add-activity-form">
+        <AntiforgeryToken />
+    
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <InputText class="form-control" @bind-Value="@FormModel.Title" placeholder="Enter title"></InputText>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <InputTextArea rows="3" class="form-control" @bind-Value="@FormModel.Description" placeholder="Enter description"></InputTextArea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Start date</label>
+            <InputDate class="form-control" @bind-Value="@FormModel.Start" placeholder="Enter start date"></InputDate>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">End date</label>
+            <InputDate class="form-control" @bind-Value="@FormModel.End" placeholder="Enter end date"></InputDate>
+        </div>
+    
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Add Activity</button>
+        </div>
+    </form>
+}
+else
+{
+    <div class="alert @StatusMessageClass">
+        @StatusMessage
+    </div>
+    <a href=@($"/module/{ModuleId}/activities") class="btn btn-outline-primary">Go back to overview</a>
+}
+
+@code {
+    [Parameter]
+    public int ModuleId { get; set; }
+
+    [SupplyParameterFromForm]
+    public ActivityCreateDTO FormModel { get; set; }
+
+    public bool IsSaved { get; set; }
+
+    public string StatusMessage { get; set; }
+    public string StatusMessageClass { get; set; }
+
+    protected override void OnInitialized()
+    {
+        FormModel ??= new();
+    }
+
+    private async Task OnSubmit()
+    {
+
+        ActivityCreateDTO postBody = new ActivityCreateDTO
+        {
+            Title = FormModel.Title,
+            Description = FormModel.Description,
+            Start = FormModel.Start,
+            End = FormModel.End,
+            ModuleID = ModuleId
+        };
+
+
+        var response = await ActivityRequestService.CreateAsync<ActivityCreateDTO>(postBody);
+
+        if (response.IsSuccessStatusCode)
+        {
+            StatusMessage = "Activity successfully added!";
+            StatusMessageClass = "alert-success";
+        }
+        else
+        {
+            StatusMessage = "Activity successfully added!";
+            StatusMessageClass = "alert-success";
+        }
+        IsSaved = true;
+    }
+}

@@ -1,0 +1,33 @@
+﻿@page "/Courses"
+@rendermode InteractiveServer
+@inject HttpClient HttpClient
+
+<PageTitle>Courses</PageTitle>
+
+<div class="row">
+    <NavLink class="nav-link" href="">
+        <span></span>
+    </NavLink>
+    <h2 class="text-center">Courses</h2>
+</div>
+
+<p> @foreach (Course x in courses)
+    {
+        <p>@x.Title</p>
+
+    }
+</p>
+@code {
+
+    List<Course> courses = new();
+ 
+    protected override async Task OnInitializedAsync()
+    {
+       // await HttpClient.GetAsync("/api/courses");
+
+       courses = await HttpClient.GetFromJsonAsync<List<Course>>("/api/courses") ?? new();
+
+
+    }
+    
+}

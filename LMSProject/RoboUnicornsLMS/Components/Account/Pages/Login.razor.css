@@ -1,0 +1,20 @@
+﻿.row {
+    margin: 100px;
+}
+
+.form-floating {
+    min-width: 300px;
+}
+
+.login-links {
+    margin-top: 50px;
+}
+
+a {
+    color: aliceblue; 
+    transition: 0.3s
+}
+
+    a:hover {
+        color: #23B0FF;
+    }

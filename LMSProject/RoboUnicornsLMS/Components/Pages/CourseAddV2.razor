@@ -1,0 +1,129 @@
+﻿@page "/courseadd"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@attribute [Authorize(Policy = ApplicationPolicy.RequireTeacherRole)]
+@inject ICourseRequestService CourseRequestService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+@using RoboUnicornsLMS.Services
+
+
+
+
+<div class="container">
+    <header>
+        <h2 class="text-center">Add course</h2>
+    </header>
+    <EditForm Model="@FormModel" OnValidSubmit="@(async () => await OnValidSubmit())">
+        <DataAnnotationsValidator />
+        <AntiforgeryToken />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label for="titleInput">Title</label>
+            <InputText id="titleInput" class="form-control" @bind-Value="@FormModel.Title" placeholder="Enter title" />
+            <ValidationMessage For="@(() => FormModel.Title)" />
+        </div>
+
+        <div class="mb-3">
+            <label for="descriptionInput" class="form-label">Description</label>
+            <InputTextArea id="descriptionInput" rows="3" class="form-control" @bind-Value="@FormModel.Description" placeholder="Enter description"></InputTextArea>
+            <ValidationMessage For="@(() => FormModel.Description)" />
+        </div>
+
+        <div class="mb-3">
+            <label for="startdateInput" class="form-label">Start date</label>
+            <InputDate id="startdateInput" class="form-control" @bind-Value="@FormModel.Start" placeholder="Enter start date" />
+            <ValidationMessage For="@(() => FormModel.Start)" />
+        </div>
+
+        <div class="mb-3">
+            <label for="enddateInput" class="form-label">End date</label>
+            <InputDate id="enddateInput" class="form-control" @bind-Value="@FormModel.End" placeholder="Enter end date"></InputDate>
+            <ValidationMessage For="@(() => FormModel.End)" />
+        </div>
+
+        <div class="mb-3">
+            <label for="maxparticipantsInput" class="form-label">Max participants</label>
+            <InputNumber id="maxparticipantsInput" class="form-control" @bind-Value="@FormModel.MaxCapcity" placeholder="Enter max participants"></InputNumber>
+            <ValidationMessage For="@(() => FormModel.MaxCapcity)" />
+        </div>
+        <div class="mb-3">
+            <button type="submit" disable="@isSubmitting" class="btn btn-primary">Add Course</button>
+        </div>
+
+    </EditForm>
+</div>
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <div class="alert @StatusMessageClass">
+        @StatusMessage
+    </div>
+}
+<div class="">
+    <p>
+        <a href="/ListCourses" alt="Return to course list" class="btn btn-primary">Return to course list</a>
+    </p>
+</div>
+
+@code {
+    private Course FormModel { get; set; } = new Course();
+
+    private string? StatusMessage { get; set; }
+    private string? StatusMessageClass { get; set; }
+    private bool isSubmitting = false;
+
+    protected override void OnInitialized()
+    {
+        FormModel ??= new Course();
+    }
+
+    private async Task OnValidSubmit(CancellationToken cancellation = default)
+    {
+        if (isSubmitting)
+        {
+            StatusMessage = "The form is already being submitted.";
+            return;
+        }
+
+        isSubmitting = true;
+        CourseCreateDTO dto = new CourseCreateDTO
+        {
+            Title = FormModel.Title,
+            Description = FormModel.Description,
+            Start = FormModel.Start,
+            End = FormModel.End,
+                MaxCapacity = FormModel.MaxCapcity
+        };
+        try
+        {
+            var result = await CourseRequestService.CreateAsync<CourseCreateDTO>(dto, cancellation);
+            if (result.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/ListCourses");
+            }
+            else
+            {
+                // Assuming the result contains the error message in the content
+                var errorMessage = await result.Content.ReadAsStringAsync();
+                StatusMessage = $"Failed to add course: {errorMessage}";
+                StatusMessageClass = "alert-danger";
+            }
+        }
+        catch(Exception ex)
+        {
+            StatusMessage = $"Failed to add course: {ex.Message}";
+            StatusMessageClass = "alert-danger";
+        }
+        isSubmitting = false;
+    }
+
+    private void ResetForm()
+    {
+        FormModel = new Course();
+        // Reset the status message as well if needed
+        StatusMessage = string.Empty;
+        StatusMessageClass = string.Empty;
+    }
+}

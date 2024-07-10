@@ -1,0 +1,14 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
+
+<CascadingAuthenticationState>
+    <div class="page">
+        <NavMenu />
+        <main role="main">
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+        <Footer />
+    </div>
+</CascadingAuthenticationState>

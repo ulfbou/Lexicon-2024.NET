@@ -1,0 +1,100 @@
+﻿@page "/CreateUser"
+@attribute [Authorize(Policy = ApplicationPolicy.RequireTeacherRole)]
+@using Microsoft.AspNetCore.Authorization
+@using RoboUnicornsLMS.Services
+@rendermode InteractiveServer
+@inject ICourseRequestService CourseRequestService
+@inject IApplicationUserRequestService UserRequestService
+<div class="container">
+    <div class="row justify-content-start">
+        <div class="col-md-6">
+            <form method="post" @onsubmit="CreateUser" @formname="create-student-form" class="form-floating mb-3">
+                <h3>Create User</h3>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="fname" name="fname" @bind-value="Fname" placeholder="First name">
+                    <label for="fname" class="text-primary">First name</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="lname" name="lname" @bind-value="Lname" placeholder="Last name">
+                    <label for="lname" class="text-primary">Last name</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="email" class="form-control" id="email" @bind-value="Email" placeholder="name@example.com">
+                    <label for="email" class="text-primary">Email</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <select class="form-select" id="course" @bind="SelectedCourseId" aria-label="Floating label select example">
+                        <option value="0" selected>Select a course</option>
+                        @foreach (var course in courses)
+                        {
+                            <option value="@course.Id">@course.Title</option>
+                        }
+                    </select>
+                    <label for="course" class="text-primary">Course</label>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <div class="alert @StatusMessageClass">
+        @StatusMessage
+    </div>
+}
+
+@code {
+    private string StatusMessage { get; set; }
+    private string StatusMessageClass { get; set; }
+
+    private IEnumerable<Course> courses =[];
+    private string Fname;
+    private string Lname;
+    private string Email;
+    private int SelectedCourseId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        courses = await CourseRequestService.GetAsync();
+    }
+
+    private async Task CreateUser()
+    {
+
+        var user = new ApplicationUser
+            {
+
+                FirstName = Fname,
+                LastName = Lname,
+                Email = Email,
+                PasswordHash = "123",
+                CourseID = SelectedCourseId,
+                UserName = Email
+            };
+
+
+
+        var response = await UserRequestService.CreateAsync(user);
+        if (response.IsSuccessStatusCode)
+        {
+            StatusMessage = "User successfully created!";
+            StatusMessageClass = "alert-success";
+
+            // Reset form
+            Fname = string.Empty;
+            Lname = string.Empty;
+            Email = string.Empty;
+            SelectedCourseId = 0;
+            user = new ApplicationUser(); // Reset form
+        }
+        else
+        {
+            StatusMessage = "Error creating user. Please try again.";
+            StatusMessageClass = "alert-danger";
+        }
+    }
+}

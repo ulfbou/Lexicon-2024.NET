@@ -1,0 +1,100 @@
+﻿@page "/useredit/{UserId}"
+@attribute [Authorize(Policy = ApplicationPolicy.RequireAnyRole)]
+@using Microsoft.AspNetCore.Authorization
+@using LMS.api.DTO
+@using LMS.api.Model
+@using RoboUnicornsLMS.Services
+@inject IApplicationUserRequestService ApplicationUserService
+@inject ICourseRequestService CourseRequestService
+@rendermode InteractiveServer
+
+<div class="container text-center">
+    <h2>Edit user</h2>
+</div>
+
+<EditForm Model="@FormModel" FormName="EditModuleForm"
+          OnValidSubmit="HandleValidSubmit"
+          method="post">
+    <div class="mb-3">
+        <label class="form-label">First name</label>
+        <InputText class="form-control" @bind-Value="@FormModel.FirstName" placeholder="Enter first name" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Last name</label>
+        <InputText class="form-control" @bind-Value="@FormModel.LastName" placeholder="Enter last name"></InputText>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <InputText class="form-control" @bind-Value="@FormModel.Email" placeholder="Enter Email"></InputText>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <InputText class="form-control" @bind-Value="@FormModel.PasswordHash" placeholder="Enter Password"></InputText>
+    </div>
+
+    <div class="mb-3">
+        <InputSelect class="form-select" @bind-Value="@FormModel.CourseID">
+            @foreach (var course in Courses)
+            {
+                <option value="@course.Id">@course.Title</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <div class="alert @StatusMessageClass">
+        @StatusMessage
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string UserId { get; set; }
+
+    public ApplicationUser FormModel { get; set; } = new();
+
+    public IEnumerable<Course> Courses { get; set; } = new List<Course>();
+    private string StatusMessage { get; set; }
+    private string StatusMessageClass { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        FormModel = await ApplicationUserService.GetAsync<ApplicationUser>(UserId);
+        Courses = await CourseRequestService.GetAsync();
+    }
+
+    protected async Task HandleValidSubmit()
+    {
+        UpdateUserDto postBody = new UpdateUserDto
+        {
+            Id = UserId,
+            FirstName = FormModel.FirstName,
+            LastName = FormModel.LastName,
+            Email = FormModel.Email,
+            Password = FormModel.PasswordHash,
+            CourseId = FormModel.CourseID
+        };
+
+        var response = await ApplicationUserService.UpdateAsync<UpdateUserDto>(UserId, postBody);
+        if (response.IsSuccessStatusCode)
+        {
+            StatusMessage = "User successfully updated! Please refresh to see the changes.";
+            StatusMessageClass = "alert-success";
+           
+        }
+        else
+        {
+            StatusMessage = "Error creating course. Please try again.";
+            StatusMessageClass = "alert-danger";
+        }
+    }
+}

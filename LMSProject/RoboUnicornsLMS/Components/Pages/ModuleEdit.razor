@@ -1,0 +1,111 @@
+﻿@page "/moduleedit/{ModuleId:int}"
+@attribute [Authorize(Policy = ApplicationPolicy.RequireTeacherRole)]
+@using Microsoft.AspNetCore.Authorization
+@using LMS.api.Model
+@using RoboUnicornsLMS.Services
+@inject IModuleRequestService ModuleRequestService
+@inject ICourseRequestService CourseRequestService
+@rendermode InteractiveServer
+
+<div class="col text-center">
+    <h2>Edit module</h2>
+</div>
+
+<EditForm Model="@FormModel" FormName="EditModuleForm" 
+    OnValidSubmit="HandleValidSubmit"
+    method="post">
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <InputText class="form-control" @bind-Value="@FormModel.Title" placeholder="Enter title" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <InputTextArea class="form-control" @bind-Value="@FormModel.Description" rows="3"  placeholder="Enter description"></InputTextArea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Start date</label>
+        <InputDate class="form-control" @bind-Value="@FormModel.Start" placeholder="Enter start date"></InputDate>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">End date</label>
+        <InputDate class="form-control" @bind-Value="@FormModel.End" placeholder="Enter end date"></InputDate>
+    </div>
+
+    <div class="mb-3">
+        <InputSelect class="form-select" @bind-Value="@FormModel.CourseId">
+            @foreach(var course in Courses)
+            {
+                <option value="@course.Id">@course.Title</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <div class="alert @StatusMessageClass">
+        @StatusMessage
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public int ModuleId { get; set; }
+
+    [SupplyParameterFromForm]
+    public ModuleDTO FormModel { get; set; } = new ModuleDTO();
+
+    private string StatusMessage { get; set; }
+    private string StatusMessageClass { get; set; }
+
+    public IEnumerable<Course> Courses { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        FormModel = await ModuleRequestService.GetAsync<ModuleDTO>(ModuleId) ?? FormModel;
+        Courses = await CourseRequestService.GetAsync();
+    }
+
+    protected async Task HandleValidSubmit()
+    {
+        ModuleDTO postBody = new ModuleDTO
+        {
+            Id = ModuleId,
+            Title = FormModel.Title,
+            Description = FormModel.Description,
+            Start = FormModel.Start,
+            End = FormModel.End,
+            CourseId = FormModel.CourseId
+        };
+
+        try 
+        {
+            var response = await ModuleRequestService.UpdateAsync<ModuleDTO>(ModuleId, postBody);
+            if (response.IsSuccessStatusCode)
+            {
+                StatusMessage = "Module successfully created! Please refresh to see the changes.";
+                StatusMessageClass = "alert-success";
+
+            }
+            else
+            {
+                StatusMessage = "Error creating course. Please try again.";
+                StatusMessageClass = "alert-danger";
+            }
+        }
+        catch (Exception ex) {
+            StatusMessage = $"Error editing a module: {ex}<br/>Please try again.";
+            StatusMessageClass = "alert-danger";
+        }
+    }
+
+    // Todo: Add handling for invalid submit and display validation errors on form
+}

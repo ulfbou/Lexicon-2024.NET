@@ -1,0 +1,313 @@
+﻿@page "/ListModules/{courseId:int}"
+@attribute [Authorize(Policy = ApplicationPolicy.RequireAnyRole)]
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
+@inject IApplicationUserRequestService ApplicationUserService
+@inject ICourseRequestService CourseRequestService
+@inject IModuleRequestService ModuleRequestService
+@using LMS.api.Model
+@using RoboUnicornsLMS.Services
+
+<PageTitle>Modules</PageTitle>
+
+  <div class="container text-center">
+            <h2>@courseTitle</h2>
+        </div>
+
+<div style="margin-bottom:100px" class="container">
+    <div class="row align-items-center mb-3">
+        <div class="col">
+            <button class="btn btn-primary mr-2" @onclick="@( () => SetView("Modules") )">Modules</button>
+            <button class="btn btn-primary mr-2" @onclick="@( () => SetView("Participants") )">Participants</button>
+            <button class="btn btn-primary" @onclick="@( () => SetView("EditCourse") )">Edit Course</button>
+        </div>
+
+        <div class="col text-center">
+               @if (currentView == "Modules")
+            {
+                <h3>Modules</h3>
+            }
+            else if (currentView == "Participants")
+            {
+                <h3>Participants</h3>
+            }
+            else if (currentView == "EditCourse")
+            {
+                <h3>Edit Course</h3>
+            }
+        </div>
+        <div class="col"></div>
+    </div>
+</div>
+
+
+
+    @if (currentView == "Modules")
+    {
+        <table class="table table-striped table-dark">
+
+    <tr>
+        <th>@nameof(Module.Title)</th>
+        <th>@nameof(Module.Description)</th>
+        <th>@nameof(Module.Start)</th>
+        <th>@nameof(Module.End)</th>
+    </tr>
+    <tbody>
+    @foreach (Module x in modules)
+    {
+        <tr>
+            <td>
+                        <p style="min-width:250px">@x.Title</p>
+            </td>
+            <td>
+                <p>@x.Description</p>
+            </td>
+                    <td style="width:100px">
+                <p>@x.Start.ToShortDateString()</p>
+            </td>
+                    <td style="width:100px">
+                <p>@x.End.ToShortDateString()</p>
+            </td>
+            <td>
+                <a href="@($"moduleedit/{x.Id}")" class="btn btn-primary">Edit</a>
+                <button type="button" class="btn btn-danger" @onclick="() => OpenDeleteDialog(x.Id)">Delete</button>
+                <a href="@($"module/{x.Id}/activities")" class="btn btn-primary">View Activities</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+    }
+    else if (currentView == "Participants")
+    {
+
+        <table class="table table-striped table-dark">
+    <thead>
+    <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Email</th>
+        <th scope="col">Role</th>         
+    </tr>
+    </thead>
+    <tbody>
+    
+  @foreach (var user in participants)
+                {
+                    <tr>
+                    <td><p>@user.FirstName @user.LastName</p></td>
+                        <td><p>@user.Email</p></td>
+                        <td><p>Undefined</p></td>
+                    </tr>
+                }
+    
+    </tbody>
+</table>
+        
+    } 
+    else if (currentView == "EditCourse")
+    {
+    <EditForm Model="@FormModel" FormName="EditCourseForm"
+              OnValidSubmit="HandleValidSubmit"
+              method="post">
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <InputText class="form-control" @bind-Value="@FormModel.Title" placeholder="Enter title" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <InputTextArea class="form-control" @bind-Value="@FormModel.Description" rows="3" placeholder="Enter description"></InputTextArea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Start date</label>
+            <InputDate class="form-control" @bind-Value="@FormModel.Start" placeholder="Enter start date"></InputDate>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">End date</label>
+            <InputDate class="form-control" @bind-Value="@FormModel.End" placeholder="Enter end date"></InputDate>
+        </div>
+
+  
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </EditForm>
+
+    @if (!string.IsNullOrEmpty(StatusMessage))
+    {
+        <div class="alert @StatusMessageClass">
+            @StatusMessage
+        </div>
+    }
+    }
+
+
+@if (currentView == "Modules")
+{
+  <div class="mb-3">
+    <a href="@($"course/{courseId}/moduleadd")" class="btn btn-primary">Add New Module</a>
+    </div>
+} else if (currentView == "Participants")
+{
+    <div class="mb-3">
+        <a class="btn btn-primary">Add New Participant</a>
+    </div>
+}
+
+<ConfirmationDialog @ref="DeleteDialog" ConfirmedChanged="ConfirmDelete_Click" 
+    ConfirmationTitle="Delete Module"
+    ConfirmationMessage=@($"Do you want to delete module with ID {moduleId}?") />
+
+
+
+@code {
+
+    [Parameter]
+    public int userId { get; set; }
+    [Parameter]
+    public int courseId { get; set; }
+    private int moduleId { get; set; }
+    private string StatusMessage { get; set; }
+    private string StatusMessageClass { get; set; }
+
+    public string courseTitle = "Loading...";
+
+    private string currentView = "Modules";  // Default view
+
+    IEnumerable<Module> modules = new List<Module>();
+    IEnumerable<ApplicationUser> participants = new List<ApplicationUser>();
+
+    [SupplyParameterFromForm]
+    public CourseDTO FormModel { get; set; } = new CourseDTO();
+
+    public RoboUnicornsLMS.Components.ConfirmationDialog DeleteDialog { get; set; }
+
+
+
+
+    protected override async Task OnInitializedAsync()
+    {  
+
+        await LoadParticipantsDataAsync();
+        await LoadModulesDataAsync();
+        await LoadCourseDataAsync();
+        FormModel = await CourseRequestService.GetAsync<CourseDTO>(courseId) ?? FormModel;
+
+        if (FormModel is null)
+        {
+            StatusMessage = "Error loading course. Please try again.";
+            StatusMessageClass = "alert-danger";
+        }
+    }
+
+    private async Task LoadModulesDataAsync()
+    {
+        try
+        {
+            modules = await ModuleRequestService.GetModulesByCourseIdAsync(courseId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading modules: {ex.Message}");
+        }
+    }
+
+
+
+  
+    private async Task LoadParticipantsDataAsync()
+    {
+        try
+        {
+            var allUsers = await ApplicationUserService.GetAsync();
+            if (allUsers.Any())
+            {
+                participants = allUsers.Where(u => u.CourseID == courseId).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading participants: {ex.Message}");
+        }
+    }
+
+    private async Task LoadCourseDataAsync()
+    {
+        try
+        {
+            Course? course = await CourseRequestService.GetAsync(courseId);
+            if (course != null)
+            {
+                courseTitle = course.Title;
+            }
+            else
+            {
+                courseTitle = "Course not found";
+            }
+        }
+        catch (Exception ex)
+        {
+            courseTitle = "Error loading course";
+            Console.WriteLine($"Error loading course: {ex.Message}");
+        }
+    }
+
+
+
+    private void SetView(string view)
+    {
+        currentView = view;
+    }
+
+    //EDIT COURSE
+    protected async Task HandleValidSubmit()
+    {
+        CourseDTO postBody = new CourseDTO
+        {
+            Id = courseId,
+            Title = FormModel.Title,
+            Description = FormModel.Description,
+            Start = FormModel.Start,
+            End = FormModel.End,
+        };
+
+        var response = await CourseRequestService.UpdateAsync(courseId, postBody, default);
+        
+        if (response.IsSuccessStatusCode)
+        {
+            StatusMessage = "Course successfully updated! Please refresh to see changes";
+            StatusMessageClass = "alert-success";
+            
+        }
+        else
+        {
+            StatusMessage = "Error creating course. Please try again.";
+            StatusMessageClass = "alert-danger";
+        }
+    }
+
+    protected void OpenDeleteDialog(int targetId)
+    {
+        moduleId = targetId;
+        DeleteDialog.ShowDialog();
+    }
+
+    protected async Task ConfirmDelete_Click(bool deleteConfirmed)
+    {
+        if (deleteConfirmed)
+        {
+            var response = await ModuleRequestService.DeleteAsync(moduleId);
+            if (response.IsSuccessStatusCode)
+            {
+                //Remove the deleted module from the list so it disappears from the UI
+                var temp = modules.ToList();
+                temp.Remove(modules.Single(m => m.Id == moduleId));
+                modules = temp;
+            }
+        }
+    }
+}

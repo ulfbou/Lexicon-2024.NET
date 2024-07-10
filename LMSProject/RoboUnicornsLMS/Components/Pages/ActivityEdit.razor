@@ -1,0 +1,103 @@
+﻿@page "/activityedit/{ActivityId:int}"
+@attribute [Authorize(Policy = ApplicationPolicy.RequireTeacherRole)]
+@using Microsoft.AspNetCore.Authorization
+@using LMS.api.DTO
+@using LMS.api.Model
+@using RoboUnicornsLMS.Services
+@inject IActivityRequestService ActivityRequestService
+@inject IModuleRequestService ModuleRequestService
+@rendermode InteractiveServer
+
+<h3>Edit Activity</h3>
+
+@if (!IsSaved)
+{
+    <EditForm Model="@FormModel" FormName="EditActivityForm"
+              OnValidSubmit="HandleValidSubmit"
+              method="post">
+
+        <div class="mb-3">
+            <label class="form-label">@(nameof(FormModel.Title))</label>
+            <InputText class="form-control" @bind-Value="@FormModel.Title" placeholder="Enter title"></InputText>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">@(nameof(FormModel.Description))</label>
+            <InputTextArea class="form-control" @bind-Value="@FormModel.Description" placeholder="Enter description"></InputTextArea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">@(nameof(FormModel.Start))</label>
+            <InputDate class="form-control" @bind-Value="@FormModel.Start" placeholder="Enter start date"></InputDate>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@(nameof(FormModel.End))</label>
+            <InputDate class="form-control" @bind-Value="@FormModel.End" placeholder="Enter end date"></InputDate>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">@(nameof(Modules))</label>
+            <InputSelect class="form-control" @bind-Value="@FormModel.ModuleID">
+                @foreach (var module in Modules)
+                {
+                    <option value="@module.Id">@module.Description</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </EditForm>
+}
+else
+{
+    <div class="alert @StatusMessageClass">
+        @StatusMessage
+    </div>
+}
+@code {
+    [Parameter]
+    public int ActivityId { get; set; }
+
+    [SupplyParameterFromForm]
+    public ActivityUpdateDTO FormModel { get; set; } = new ActivityUpdateDTO();
+
+    public IEnumerable<Module> Modules { get; set; } = [];
+
+    public bool IsSaved { get; set; }
+
+    public string StatusMessage { get; set; }
+    public string StatusMessageClass { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        FormModel = await ActivityRequestService.GetAsync<ActivityUpdateDTO>(ActivityId) ?? FormModel;
+        Modules = await ModuleRequestService.GetAsync();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        ActivityUpdateDTO postBody = new ActivityUpdateDTO
+        {
+            Id = ActivityId,
+            Title = FormModel.Title,
+            Description = FormModel.Description,
+            Start = FormModel.Start,
+            End = FormModel.End,
+            ModuleID = FormModel.ModuleID
+        };
+
+        var response = await ActivityRequestService.UpdateAsync<ActivityUpdateDTO>(ActivityId, postBody);
+        if (response.IsSuccessStatusCode)
+        {
+            StatusMessage = "Activity successfully edited!";
+            StatusMessageClass = "alert-success";
+        }
+        else
+        {
+            StatusMessage = "Ooops. Something went wrong. Please try again later.";
+            StatusMessageClass = "alert-danger";
+        }
+        IsSaved = true;
+    }
+}

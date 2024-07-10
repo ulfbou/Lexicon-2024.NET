@@ -1,0 +1,50 @@
+﻿@page "/admin"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = ApplicationPolicy.RequireAdminRole)]
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Authorization
+@using LMS.api.Model
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+
+<PageTitle>Admin</PageTitle>
+
+@code {
+    private string userName = string.Empty;
+    private IEnumerable<string> userRoles = new List<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            userName = user.Identity?.Name ?? string.Empty;
+            if (!string.IsNullOrEmpty(userName))
+            {
+                var appUser = await UserManager.FindByNameAsync(userName);
+                if (appUser != null)
+                {
+                    userRoles = await UserManager.GetRolesAsync(appUser);
+                }
+            }
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/account/login");
+        }
+    }
+}
+
+<h3>Admin Page</h3>
+<p>This page is accessible only to users in the Admin role.</p>
+@if (userName != "")
+{
+    if (userRoles.Any())
+    {
+        <p>Your roles: @string.Join(", ", userRoles)</p>
+    }
+}

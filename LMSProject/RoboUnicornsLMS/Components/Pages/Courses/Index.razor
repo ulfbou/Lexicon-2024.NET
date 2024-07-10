@@ -1,0 +1,56 @@
+﻿@page "/Course/"
+@inherits BaseIndexComponent<Course, int>
+@using RoboUnicornsLMS.Components.Shared
+@using RoboUnicornsLMS.Services
+@inject NavigationManager NavigationManager
+
+<h3>Courses</h3>
+
+@if (!string.IsNullOrWhiteSpace(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
+}
+
+<NavLink class="btn btn-primary mb-3" href="Course/Add">Create course</NavLink>
+
+@if (Entities != null && Entities.Any())
+{
+    <table class="table table-striped table-dark">
+        <thead>
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Name</th>
+                <th scope="col">Description</th>
+                <th scope="col">Start</th>
+                <th scope="col">End</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var course in Entities.Take(10))
+            {
+                <tr>
+                    <td>@course.Id</td>
+                    <td>@course.Title</td>
+                    <td>@course.Description</td>
+                    <td>@course.Start</td>
+                    <td>@course.End</td>
+                    <td>
+                        <NavLink href="@($"Course/Details/{course.Id}")">Details</NavLink>
+                        <NavLink href="@($"Course/Edit/{course.Id}")">Edit</NavLink>
+                        <NavLink href="@($"Course/Delete/{course.Id}")">Delete</NavLink>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+}

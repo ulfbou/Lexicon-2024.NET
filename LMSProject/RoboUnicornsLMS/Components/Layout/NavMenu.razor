@@ -1,0 +1,99 @@
+@implements IDisposable
+@rendermode InteractiveServer
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Components.Authorization
+@using RoboUnicornsLMS.Services
+
+<header>
+    <div class="container">
+        <h1 class="display-4 robo">ROBO UNICORNS</h1>
+    </div>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                        <span class="bi bi-list-nested-nav-menu link-hover" aria-hidden="true">Home</span>
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="ListCourses">
+                        <span class="bi bi-list-nested-nav-menu link-hover" aria-hidden="true">Courses</span>
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="SchoolDirectory">
+                        <span class="bi bi-list-nested-nav-menu link-hover" aria-hidden="true">School Directory</span>
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="Admin">
+                        <span class="bi bi-list-nested-nav-menu link-hover" aria-hidden="true">Admin Role</span>
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="Any">
+                        <span class="bi bi-list-nested-nav-menu link-hover" aria-hidden="true">Any Role</span>
+                    </NavLink>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ml-auto">
+                <AuthorizeView>
+                    <Authorized>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="Account/Manage">
+                                <span class="bi bi-list-nested-nav-menu link-hover" aria-hidden="true">Profile</span>
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <form action="Account/Logout" method="post" id="logout-form" class="d-inline">
+                                <AntiforgeryToken />
+                                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                                <button type="submit" class="nav-link button-logout">
+                                    <span class="bi bi-box-arrow-right link-hover" aria-hidden="true">Logout</span>
+                                </button>
+                            </form>
+                        </li>
+                    </Authorized>
+                    <NotAuthorized>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="Account/Register">
+                                <span class="bi bi-list-nested-nav-menu link-hover" aria-hidden="true">Register</span>
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="Account/Login">
+                                <span class="bi bi-list-nested-nav-menu link-hover" aria-hidden="true">Login</span>
+                            </NavLink>
+                        </li>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+@code {
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

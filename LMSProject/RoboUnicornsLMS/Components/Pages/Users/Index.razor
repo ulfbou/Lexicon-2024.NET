@@ -1,0 +1,52 @@
+﻿@page "/User/"
+@inherits BaseIndexComponent<ApplicationUser, string>
+@using RoboUnicornsLMS.Components.Shared
+@using RoboUnicornsLMS.Services
+@inject NavigationManager NavigationManager
+
+<h3>ApplicationUsers</h3>
+
+@if (!string.IsNullOrWhiteSpace(ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ErrorMessage
+    </div>
+}
+
+<NavLink class="btn btn-primary mb-3" href="ApplicationUser/Add">Create User</NavLink>
+
+@if (Entities != null && Entities.Any())
+{
+    <table class="table table-striped table-dark">
+        <thead>
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Name</th>
+                <!-- Adjust columns as per ApplicationUser properties -->
+                <th scope="col">Email</th> <!-- Example adjustment -->
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Entities.Take(10))
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.UserName</td> <!-- Assuming UserName is the correct property -->
+                    <td>@user.Email</td> <!-- Example adjustment -->
+                    <td>
+                        <NavLink href="@($"ApplicationUser/Details/{user.Id}")">Details</NavLink>
+                        <NavLink href="@($"ApplicationUser/Edit/{user.Id}")">Edit</NavLink>
+                        <NavLink href="@($"ApplicationUser/Delete/{user.Id}")">Delete</NavLink>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+}

@@ -1,0 +1,86 @@
+﻿@page "/course/{CourseId:int}/moduleadd"
+@attribute [Authorize(Policy = ApplicationPolicy.RequireTeacherRole)]
+@using Microsoft.AspNetCore.Authorization
+@using LMS.api.Model
+@using RoboUnicornsLMS.Services
+@using System.Net
+@inject IModuleRequestService ModuleRequestService
+
+<div class="col text-center">
+    <h2>Add module</h2>
+</div>
+
+<form method="post" data-enhance @onsubmit="OnSubmit" @formname="add-module-form">
+    <AntiforgeryToken />
+
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <InputText class="form-control" @bind-Value="@FormModel.Title" placeholder="Enter title" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <InputTextArea rows="3" class="form-control" @bind-Value="@FormModel.Description" placeholder="Enter description"></InputTextArea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Start date</label>
+        <InputDate class="form-control" @bind-Value="@FormModel.Start" placeholder="Enter start date" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">End date</label>
+        <InputDate class="form-control" @bind-Value="@FormModel.End" placeholder="Enter end date"></InputDate>
+    </div>
+
+    <div class="mb-3">
+        <button type="submit" class="btn btn-primary">Add Module</button>
+    </div>
+</form>
+
+@if (!string.IsNullOrEmpty(StatusMessage))
+{
+    <div class="alert @StatusMessageClass">
+        @StatusMessage
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int CourseId { get; set; }
+
+    [SupplyParameterFromForm]
+    private ModuleDTO FormModel { get; set; }
+
+    private string StatusMessage { get; set; }
+    private string StatusMessageClass { get; set; }
+
+    protected override void OnInitialized()
+    {
+        FormModel ??= new ModuleDTO();
+    }
+
+    private async Task OnSubmit()
+    {
+        ModuleDTO postBody = new ModuleDTO
+        {
+            Title = FormModel.Title,
+            Description = FormModel.Description,
+            Start = FormModel.Start,
+            End = FormModel.End,
+            CourseId = CourseId
+        };
+
+        HttpResponseMessage response = await ModuleRequestService.CreateAsync<ModuleDTO>(postBody);
+        if (response.IsSuccessStatusCode)
+        {
+            StatusMessage = "Module added successfully";
+            StatusMessageClass = "alert-success";
+        }
+        else
+        {
+            StatusMessage = "Failed to add module";
+            StatusMessageClass = "alert-danger";
+        }
+    }
+}
