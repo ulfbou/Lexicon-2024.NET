@@ -1,8 +1,5 @@
 ﻿using AutoMapper;
-<<<<<<< HEAD
-=======
 using Azure.Core;
->>>>>>> Iinitial commit
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -44,33 +41,15 @@ namespace TenantManagement.Functions
 
                 return new CreatedResult($"/api/courses/{course.Id}", dto);
             }
-<<<<<<< HEAD
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-=======
             catch (Exception)
             {
                 // TenantService logs the exception
->>>>>>> Iinitial commit
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
 
         // Get: api/courses
         [Function("GetCourses")]
-<<<<<<< HEAD
-        public async Task<IActionResult> GetCourses([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "courses")] HttpRequest req)
-        {
-            try
-            {
-                var dtos = await _service.GetBulkAsync<ReadCourseDto>(null, CancellationToken.None);
-                return new OkObjectResult(dtos);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-=======
         public async Task<IActionResult> GetCourses([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "courses")] HttpRequest request,
             [FromQuery] int? pageNumber,
             [FromQuery] int? pageSize,
@@ -89,7 +68,6 @@ namespace TenantManagement.Functions
             catch (Exception)
             {
                 // TenantService logs the exception
->>>>>>> Iinitial commit
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
@@ -101,13 +79,9 @@ namespace TenantManagement.Functions
         {
             try
             {
-<<<<<<< HEAD
-                var course = await _service.GetAsync<ReadCourseDto>(id, CancellationToken.None);
-=======
                 string? tenantId = request?.Headers["X-Tenant-Id"];
 
                 var course = await _service.GetAsync<ReadCourseDto>(tenantId ?? Tenant.DefaultTenantKey, id, CancellationToken.None);
->>>>>>> Iinitial commit
                 if (course == null)
                 {
                     return new NotFoundResult();
@@ -115,15 +89,9 @@ namespace TenantManagement.Functions
 
                 return new OkObjectResult(course);
             }
-<<<<<<< HEAD
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-=======
             catch (Exception)
             {
                 // TenantService logs the exception
->>>>>>> Iinitial commit
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
@@ -141,15 +109,6 @@ namespace TenantManagement.Functions
                     return new BadRequestResult();
                 }
 
-<<<<<<< HEAD
-                UpdateCourseDto createdDto = await _service.UpdateAsync(dto, CancellationToken.None);
-
-                return new OkObjectResult(createdDto);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-=======
                 string? tenantId = request?.Headers["X-Tenant-Id"];
 
                 UpdateCourseDto createdDto = await _service.UpdateAsync(tenantId ?? Tenant.DefaultTenantKey, dto, CancellationToken.None);
@@ -159,7 +118,6 @@ namespace TenantManagement.Functions
             catch (Exception)
             {
                 // TenantService logs the exception
->>>>>>> Iinitial commit
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
@@ -171,15 +129,6 @@ namespace TenantManagement.Functions
         {
             try
             {
-<<<<<<< HEAD
-                await _service.DeleteAsync(id, CancellationToken.None);
-
-                return new OkResult();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-=======
                 string? tenantId = request?.Headers["X-Tenant-Id"];
 
                 await _service.DeleteAsync(tenantId ?? Tenant.DefaultTenantKey, id, CancellationToken.None);
@@ -189,7 +138,6 @@ namespace TenantManagement.Functions
             catch (Exception)
             {
                 // TenantService logs the exception
->>>>>>> Iinitial commit
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }

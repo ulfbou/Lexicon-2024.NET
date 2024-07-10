@@ -4,17 +4,18 @@ using Microsoft.Extensions.Configuration;
 using System.Linq;
 using System.Linq.Dynamic.Core.Parser;
 using System.Linq.Expressions;
+using TenantManagement.Entities;
 using TenantManagement.Extensions;
 
 namespace TenantManagement.Repository
 {
-    public class AzuriteTableRepository<TEntity> : IRepository<TEntity> where TEntity : class, ITableEntity
+    public class TenantStorageTableRepository<TEntity> : ITenantRepository<TEntity> where TEntity : TenantEntity, ITenantEntity
     {
         private readonly IConfiguration _configuration;
         private readonly string _entityName;
         private readonly TableClient _tableClient;
 
-        public AzuriteTableRepository(IConfiguration configuration)
+        public TenantStorageTableRepository(IConfiguration configuration)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _entityName = typeof(TEntity).Name;
@@ -27,8 +28,11 @@ namespace TenantManagement.Repository
             _tableClient.CreateIfNotExists();
         }
 
-        public async Task<TEntity?> CreateAsync(TEntity entity, CancellationToken cancellationToken = default)
+        public async Task<TEntity?> CreateAsync(string tenantKey, TEntity entity, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrEmpty(tenantKey)) throw new ArgumentNullException(nameof(tenantKey));
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+
             try
             {
                 await _tableClient.AddEntityAsync(entity, cancellationToken);
@@ -42,6 +46,9 @@ namespace TenantManagement.Repository
 
         public async Task<TEntity?> GetAsync(string tenantKey, string entityKey, CancellationToken cancellation = default)
         {
+            if (string.IsNullOrEmpty(tenantKey)) throw new ArgumentNullException(nameof(tenantKey));
+            if (string.IsNullOrEmpty(entityKey)) throw new ArgumentNullException(nameof(entityKey));
+
             try
             {
                 var response = await _tableClient.GetEntityAsync<TEntity>(tenantKey, entityKey, null, cancellation);
@@ -53,8 +60,9 @@ namespace TenantManagement.Repository
             }
         }
 
-        public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellation = default)
+        public async Task<TEntity> UpdateAsync(string tenantKey, TEntity entity, CancellationToken cancellation = default)
         {
+            if (string.IsNullOrEmpty(tenantKey)) throw new ArgumentNullException(nameof(tenantKey));
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
             Response? response = null;
@@ -75,6 +83,9 @@ namespace TenantManagement.Repository
 
         public async Task DeleteAsync(string tenantKey, string entityKey, CancellationToken cancellation = default)
         {
+            if (string.IsNullOrEmpty(tenantKey)) throw new ArgumentNullException(nameof(tenantKey));
+            if (string.IsNullOrEmpty(entityKey)) throw new ArgumentNullException(nameof(entityKey));
+
             try
             {
                 var response = await _tableClient.GetEntityAsync<TEntity>(tenantKey, entityKey, ["PartitionKey"], cancellation);
@@ -92,11 +103,15 @@ namespace TenantManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<TEntity>> CreateBulkAsync(IEnumerable<TEntity> entity, CancellationToken cancellation = default)
+        public async Task<IEnumerable<TEntity>> CreateBulkAsync(string tenantKey, IEnumerable<TEntity> entity, CancellationToken cancellation = default)
         {
+            if (string.IsNullOrEmpty(tenantKey)) throw new ArgumentNullException(nameof(tenantKey));
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+
             try
             {
-                var tasks = entity.Select(e => CreateAsync(e, cancellation));
+
+                var tasks = entity.Select(e => CreateAsync(tenantKey, e, cancellation));
                 var result = await Task.WhenAll(tasks);
                 return result.Where(e => e != null).Select(e => e!);
             }
@@ -106,8 +121,11 @@ namespace TenantManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<TEntity>> GetBulkAsync(Expression<Func<TEntity, bool>>? filter, CancellationToken cancellation = default)
+        public async Task<IEnumerable<TEntity>> GetBulkAsync(string tenantKey, Expression<Func<TEntity, bool>>? filter, CancellationToken cancellation = default)
         {
+            if (string.IsNullOrEmpty(tenantKey)) throw new ArgumentNullException(nameof(tenantKey));
+            if (filter == null) throw new ArgumentNullException(nameof(filter));
+
             try
             {
                 AsyncPageable<TEntity> query = _tableClient.QueryAsync(filter: filter, cancellationToken: cancellation);
@@ -119,11 +137,14 @@ namespace TenantManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<TEntity>> UpdateBulkAsync(List<TEntity> entities, CancellationToken cancellation = default)
+        public async Task<IEnumerable<TEntity>> UpdateBulkAsync(string tenantKey, IEnumerable<TEntity> entities, CancellationToken cancellation = default)
         {
+            if (string.IsNullOrEmpty(tenantKey)) throw new ArgumentNullException(nameof(tenantKey));
+            if (entities == null) throw new ArgumentNullException(nameof(entities));
+
             try
             {
-                var tasks = entities.Select(e => UpdateAsync(e, cancellation));
+                var tasks = entities.Select(e => UpdateAsync(tenantKey, e, cancellation));
                 return await Task.WhenAll(tasks);
             }
             catch (Exception)
@@ -132,8 +153,11 @@ namespace TenantManagement.Repository
             }
         }
 
-        public Task DeleteBulkAsync(IEnumerable<string> ids, CancellationToken cancellation = default)
+        public Task DeleteBulkAsync(string tenantKey, IEnumerable<string> ids, CancellationToken cancellation = default)
         {
+            if (string.IsNullOrEmpty(tenantKey)) throw new ArgumentNullException(nameof(tenantKey));
+            if (ids == null) throw new ArgumentNullException(nameof(ids));
+
             try
             {
                 var tasks = ids.Select(id => DeleteAsync(id, id, cancellation));
