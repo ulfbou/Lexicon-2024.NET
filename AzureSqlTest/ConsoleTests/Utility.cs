@@ -1,10 +1,7 @@
-﻿
-namespace AzureSqlTest.ConsoleTests
+﻿namespace AzureSqlTest.ConsoleTests
 {
-    // Console utility class for parsing user input
     public class Utility
     {
-        // 
         public static string? ParseString(string prompt, bool optional = false)
         {
             string newPrompt = $"{prompt}{(optional ? " (optional)" : "")}:";
@@ -37,18 +34,8 @@ namespace AzureSqlTest.ConsoleTests
             return value;
         }
 
-        //command.Parameters.AddWithValue("@City", city);
-        //command.Parameters.AddWithValue("@StateProvince", stateProvince);
-        //command.Parameters.AddWithValue("@CountryRegion", countryRegion);
-        //command.Parameters.AddWithValue("@PostalCode", postalCode);
-        //command.Parameters.AddWithValue("@AddressLine1", addressLine1);
-        //command.Parameters.AddWithValue("@AddressLine2", addressLine2 ?? string.Empty);
-        //await command.ExecuteNonQueryAsync();
-
-        // Generate code to ask the user for information to use when testing the CRUD operations.
         internal static async Task RunAsync(AddressCRUD addressCRUD)
         {
-            // Query the user for input to test the CRUD operations
             while (true)
             {
                 Console.WriteLine("1. Create a new address");
@@ -87,7 +74,7 @@ namespace AzureSqlTest.ConsoleTests
                         postalCode = Utility.ParseString("Enter the postal code: ", true);
                         addressLine1 = Utility.ParseString("Enter the address line 1: ", true);
                         addressLine2 = Utility.ParseString("Enter the address line 2: ", optional: true);
-                        await addressCRUD.TryUpdateAsync(addressId, city, stateProvince, countryRegion, postalCode, addressLine1, addressLine2);
+                        await addressCRUD.TryUpdateAsync(addressId, city!, stateProvince!, countryRegion!, postalCode!, addressLine1!, addressLine2!);
                         break;
                     case 4:
                         addressLine1 = Utility.ParseString("Enter the address ID: ");

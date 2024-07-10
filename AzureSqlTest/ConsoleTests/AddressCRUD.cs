@@ -1,5 +1,4 @@
 ﻿using Microsoft.Data.SqlClient;
-using System.Net;
 
 namespace AzureSqlTest.ConsoleTests
 {
@@ -8,9 +7,6 @@ namespace AzureSqlTest.ConsoleTests
         private SqlConnection _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         SqlCommandBuilder _sqlCommandBuilder = new SqlCommandBuilder();
 
-        // Generate methods to create, read, update, and delete records in the Address table using the SqlCommandBuilder
-
-        // Generate a method to create a new address record in the Address table
         public async Task<bool> TryCreateAsync(string addressLine1, string city, string stateProvince, string countryRegion, string postalCode, string addressLine2 = "")
         {
             string createSql = _sqlCommandBuilder.BuildInsertCommand(new string[] { "AddressLine1", "AddressLine2", "City", "StateProvince", "CountryRegion", "PostalCode" });
@@ -36,8 +32,6 @@ namespace AzureSqlTest.ConsoleTests
             }
         }
 
-        // Generate a method to read address records from the Address table
-
         public async Task<bool> TryReadAsync(string parameterName, string parameterValue)
         {
             string whereClause = $"[{parameterName}] = @{parameterName}";
@@ -47,7 +41,6 @@ namespace AzureSqlTest.ConsoleTests
                 await Console.Out.WriteLineAsync(readSql);
                 using (SqlCommand command = new SqlCommand(readSql, _connection))
                 {
-                    // Add the missing parameter to the command
                     command.Parameters.AddWithValue($"@{parameterName}", parameterValue);
 
                     using (SqlDataReader reader = await command.ExecuteReaderAsync())
@@ -55,7 +48,7 @@ namespace AzureSqlTest.ConsoleTests
                         while (await reader.ReadAsync())
                         {
                             var addressLine1 = reader.GetString(0);
-                            var addressLine2 = reader.IsDBNull(1) ? string.Empty : reader.GetString(1); // Handle possible NULL value
+                            var addressLine2 = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
                             var city = reader.GetString(2);
                             var stateProvince = reader.GetString(3);
                             var countryRegion = reader.GetString(4);
@@ -73,10 +66,8 @@ namespace AzureSqlTest.ConsoleTests
             }
         }
 
-        // Generate a method to update an address record in the Address table. it should only update non-null values
-        public async Task<bool> TryUpdateAsync(int addressId, string addressLine1, string city, string stateProvince, string countryRegion, string postalCode, string addressLine2 = "")
+        public async Task<bool> TryUpdateAsync(int addressId, string? addressLine1, string? city, string? stateProvince, string? countryRegion, string? postalCode, string? addressLine2 = "")
         {
-            // Add parameters that contain non-null values
             List<string> parameters = new List<string>();
 
             if (!string.IsNullOrEmpty(addressLine1)) parameters.Add("AddressLine1");
@@ -86,7 +77,6 @@ namespace AzureSqlTest.ConsoleTests
             if (!string.IsNullOrEmpty(countryRegion)) parameters.Add("CountryRegion");
             if (!string.IsNullOrEmpty(postalCode)) parameters.Add("PostalCode");
 
-            // Generate the update command
             string updateSql = _sqlCommandBuilder.BuildUpdateCommand(parameters.ToArray());
             await Console.Out.WriteLineAsync(updateSql);
             try
@@ -113,7 +103,6 @@ namespace AzureSqlTest.ConsoleTests
             }
         }
 
-        // Generate a method to delete an address record from the Address table
         public async Task<bool> TryDeleteAsync(int addressId)
         {
             string deleteSql = _sqlCommandBuilder.BuildDeleteCommand("AddressLine1");
