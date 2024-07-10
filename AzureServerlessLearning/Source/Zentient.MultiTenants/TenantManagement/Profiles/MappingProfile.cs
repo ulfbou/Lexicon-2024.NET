@@ -12,9 +12,9 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 namespace TenantManagement.Profiles
 {
     // Automapper profile for mapping between DTOs and entities
-    public class CourseMappingProfile : Profile
+    public class MappingProfile : Profile
     {
-        public CourseMappingProfile()
+        public MappingProfile()
         {
             CreateMap<Course, CreateCourseDto>().ReverseMap();
             CreateMap<Course, ReadCourseDto>().ReverseMap();

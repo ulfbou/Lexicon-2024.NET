@@ -3,6 +3,8 @@ using Azure.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Core;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using TenantManagement.DTOs;
@@ -18,8 +20,18 @@ namespace TenantManagement.Functions
         private readonly ITenantService<Course> _service = service ?? throw new ArgumentNullException(nameof(_service));
         private readonly ILogger<CourseFunctions> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
+        [Function(nameof(CreateCourse))]
+        public async Task<IActionResult> CreateCourse([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "courses")] CreateCourseDto dto)
+        {
+            // Use the service with Course as the generic type argument
+            var course = await _service.CreateAsync<CreateCourseDto>(null!, dto, CancellationToken.None);
+            return new OkObjectResult("Course created");
+
+        }
+
         // Post: api/courses
-        [Function("CreateCourse")]
+#if false
+[Function("CreateCourse")]
         public async Task<IActionResult> CreateCourse(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "courses")] HttpRequest request)
         {
@@ -47,7 +59,7 @@ namespace TenantManagement.Functions
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
-
+#endif
         // Get: api/courses
         [Function("GetCourses")]
         public async Task<IActionResult> GetCourses([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "courses")] HttpRequest request,
